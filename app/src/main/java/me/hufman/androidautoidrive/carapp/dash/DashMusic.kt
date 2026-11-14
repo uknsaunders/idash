@@ -70,8 +70,26 @@ class DashMusic(val context: Context) {
 		val list = ArrayList<String>()
 		list.add(BACK)
 		items.take(MAX_ROWS).forEach { list.add(label(it)) }
-		if (items.isEmpty()) list.add("Nothing here")
+		if (items.isEmpty()) {
+			if (emptyAtTop()) {
+				list.add("Play ${current?.name}")
+				list.add(emptyReason())
+			} else list.add("Nothing here")
+		}
 		return list
+	}
+
+	/** An app that gave no list at all at its top level, rather than an empty folder */
+	private fun emptyAtTop(): Boolean = items.isEmpty() && trail.size == 1
+
+	/** Why an app showed nothing, as best we can tell */
+	private fun emptyReason(): String {
+		val app = current ?: return "Nothing here"
+		return when {
+			app.packageName.startsWith("com.spotify") -> "Spotify only lists for apps it has approved: needs a Spotify key in the build"
+			!app.connectable -> "${app.name} doesn't let other apps list its music"
+			else -> "${app.name} sent back an empty list"
+		}
 	}
 
 	private fun label(item: MusicMetadata): String {
@@ -89,6 +107,10 @@ class DashMusic(val context: Context) {
 			}
 			if (row == 0) {
 				back()
+				return false
+			}
+			if (emptyAtTop()) {
+				if (row == 1) { controller.play(); return true }
 				return false
 			}
 			val item = items.getOrNull(row - 1) ?: return false

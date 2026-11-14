@@ -43,6 +43,8 @@ jobs:
       - name: Build i3 Dash
         env:
           W3W_API_KEY: ${{ secrets.W3W_API_KEY }}
+          # a Spotify Client ID (not a secret, but kept out of the code) so Spotify can be listed and searched
+          AndroidAutoIdrive_SpotifyApiKey: ${{ secrets.ANDROIDAUTOIDRIVE_SPOTIFYAPIKEY }}
         run: ./gradlew assembleNomapNonalyticsFullDebug --stacktrace
 
       - name: Name the app file
