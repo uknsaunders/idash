@@ -270,7 +270,10 @@ function kmPerKwh(){
 }
 
 window.i3feed=function(d){
+  const ocmWas=D.ocmKey;
   Object.assign(D,d);
+  // a key saved (or changed) while driving: fetch chargers again now, with availability
+  if(D.ocmKey!==ocmWas&&D.ocmKey){chgAt=null;chgTry=0}
   if(D.units){const [dd,tt]=String(D.units).split(',');miles=dd==='Miles';fahr=tt==='FAHRENHEIT'}
   journeyTick();render();
   if(D.lat!=null)onPosition(D.lat,D.lon,D.heading);
@@ -438,18 +441,28 @@ function drawLimit(){
 }
 
 /* ---------- charging points (Open Charge Map if a key is set, else OpenStreetMap locations only) ---------- */
-let chargers=[],chgAt=null,chgTry=0,chgBusy=false,chgLayer=null,chgLive=false;
+let chargers=[],chgAt=null,chgTry=0,chgBusy=false,chgLayer=null,chgLive=false,chgSrc='';
 // Open Charge Map's connections carry a reported status per plug where the operator shares it;
 // not every network reports live, so this is "as reported", not guaranteed accurate this second.
+// Open Charge Map status ids, used when an answer carries only StatusTypeID and not the StatusType object
+const OCM_STATUS={0:['Unknown',null],10:['Available',true],20:['In use',true],30:['Temporarily unavailable',false],
+  50:['Operational',true],75:['Partly operational',true],100:['Not operational',false],150:['Planned',false],200:['Removed',false],210:['Removed',false]};
+function ocmStatus(o){
+  if(o&&o.StatusType&&o.StatusType.Title)return {title:o.StatusType.Title,ok:o.StatusType.IsOperational};
+  const s=o&&o.StatusTypeID!=null?OCM_STATUS[o.StatusTypeID]:null;
+  return s&&o.StatusTypeID!==0?{title:s[0],ok:s[1]}:null;
+}
 function parseOcm(list){
   return (list||[]).map(p=>{
     const a=p.AddressInfo||{},conns=p.Connections||[];
     if(a.Latitude==null||a.Longitude==null)return null;
     const total=p.NumberOfPoints||conns.length||1;
-    const withStatus=conns.filter(c=>c.StatusType&&c.StatusType.Title);
+    const st=conns.map(ocmStatus).filter(x=>x&&x.title!=='Unknown');
     let avail=null;
-    if(withStatus.length){const up=withStatus.filter(c=>c.StatusType.IsOperational).length;avail=up+' of '+withStatus.length+' reported working'}
-    else if(p.StatusType&&p.StatusType.Title&&p.StatusType.Title!=='Unknown')avail=p.StatusType.Title;
+    const inUse=st.filter(x=>x.title==='In use').length,free=st.filter(x=>x.title==='Available').length;
+    if(inUse||free)avail=free+' free, '+inUse+' in use';
+    else if(st.length){const up=st.filter(x=>x.ok).length;avail=up+' of '+st.length+' reported working'}
+    else{const ps=ocmStatus(p);if(ps&&ps.title!=='Unknown')avail=ps.title}
     const kw=Math.max(0,...conns.map(c=>c.PowerKW||0));
     let info=total+(total>1?' points':' point');
     if(kw)info+=' · '+Math.round(kw)+'kW';
@@ -470,11 +483,12 @@ async function fetchChargers(){
   try{
     if(D.ocmKey){
       try{
-        const u='https://api.openchargemap.io/v3/poi/?output=json&latitude='+pos[1].toFixed(4)+'&longitude='+pos[0].toFixed(4)+'&distance=20&distanceunit=KM&maxresults=60&compact=true&verbose=false&key='+encodeURIComponent(D.ocmKey);
+        const u='https://api.openchargemap.io/v3/poi/?output=json&latitude='+pos[1].toFixed(4)+'&longitude='+pos[0].toFixed(4)+'&distance=20&distanceunit=KM&maxresults=60&verbose=false&key='+encodeURIComponent(D.ocmKey);
         const j=await (await fetch(u)).json();
-        chargers=parseOcm(j);chgLive=true;
-      }catch(e){log('open charge map: '+e.message);chargers=await fetchOsmChargers();chgLive=false}
-    }else{chargers=await fetchOsmChargers();chgLive=false}
+        if(!Array.isArray(j))throw new Error((j&&(j.message||j.error))||'unexpected answer');
+        chargers=parseOcm(j);chgLive=true;chgSrc='status from Open Charge Map';
+      }catch(e){log('open charge map: '+e.message);chargers=await fetchOsmChargers();chgLive=false;chgSrc='Open Charge Map failed ('+e.message+') - locations only'}
+    }else{chargers=await fetchOsmChargers();chgLive=false;chgSrc='locations only - add an Open Charge Map key for status'}
     chgAt=pos;drawChargers();
   }catch(e){log('chargers: '+e.message)}
   chgBusy=false;
@@ -497,6 +511,7 @@ function chargersMenu(){
   nearChargers(8).forEach(n=>it.push({label:n.c.name,note:fmtD(n.d*1.25)+(n.c.info?' · '+n.c.info:''),act(){goTo({lat:n.c.lat,lon:n.c.lon,name:n.c.name})}}));
   if(it.length===first)it.push({label:'No charging points found yet',dim:1});
   if(route)it.push({label:'Stop navigation',act(){stopNav();closeMenu()}});
+  if(chgSrc)it.push({label:'Source',note:chgSrc,dim:1});
   it.push({label:'Close menu',act:closeMenu});
   openMenu('Chargers',it,first);
 }

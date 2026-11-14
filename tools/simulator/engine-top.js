@@ -32,12 +32,13 @@ window.fetch=async function(u){u=String(u);
   if(u.includes('overpass')){const q=decodeURIComponent(u);return ok({elements:q.includes('charging')?[{lat:sim.lat+0.012,lon:sim.lon+0.01,tags:{name:'Gorey Pier',capacity:'2'}},{lat:sim.lat-0.004,lon:sim.lon-0.006,tags:{name:'Grouville Parish Hall',capacity:'1'}},{lat:sim.lat+0.003,lon:sim.lon-0.07,tags:{operator:'Evolve',capacity:'6'}},{lat:sim.lat-0.01,lon:sim.lon-0.03,tags:{name:'Longueville Waitrose',capacity:'4'}},{lat:sim.lat+0.02,lon:sim.lon-0.09,tags:{name:'Sand Street car park',capacity:'8'}},{lat:sim.lat+0.04,lon:sim.lon-0.1,tags:{}}]:[]})}
   if(u.includes('openchargemap')){
     const poi=(title,lat,lon,points,kw,statuses)=>({AddressInfo:{Title:title,Latitude:lat,Longitude:lon},NumberOfPoints:points,
-      Connections:statuses.map(s=>({PowerKW:kw,StatusType:{Title:s,IsOperational:s==='Available'}}))});
+      // like the real compact answer: status ids only, no StatusType objects
+      Connections:statuses.map(s=>({PowerKW:kw,StatusTypeID:{Operational:50,'Not operational':100,Unknown:0}[s]}))});
     return ok([
-      poi('Gorey Pier',sim.lat+0.012,sim.lon+0.01,2,22,['Available','In Use']),
-      poi('Grouville Parish Hall',sim.lat-0.004,sim.lon-0.006,1,7,['Available']),
-      poi('Longueville Waitrose',sim.lat-0.01,sim.lon-0.03,4,50,['Available','Available','Faulted','In Use']),
-      poi('Sand Street car park',sim.lat+0.02,sim.lon-0.09,8,7,['In Use','In Use','In Use','In Use','In Use','In Use','In Use','In Use'])
+      poi('Gorey Pier',sim.lat+0.012,sim.lon+0.01,2,22,['Operational','Operational']),
+      poi('Grouville Parish Hall',sim.lat-0.004,sim.lon-0.006,1,7,['Unknown']),
+      poi('Longueville Waitrose',sim.lat-0.01,sim.lon-0.03,4,50,['Operational','Operational','Not operational','Operational']),
+      poi('Sand Street car park',sim.lat+0.02,sim.lon-0.09,8,7,['Operational','Operational','Operational','Operational','Operational','Operational','Operational','Not operational'])
     ])}
   throw new Error('not loaded in the simulator');
 };
