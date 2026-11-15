@@ -26,6 +26,7 @@ import me.hufman.androidautoidrive.carapp.carinfo.CarInformationDiscoveryService
 import me.hufman.androidautoidrive.cds.CDSEventHandler
 import me.hufman.androidautoidrive.cds.CDSVehicleLanguage
 import me.hufman.androidautoidrive.connections.BtStatus
+import me.hufman.androidautoidrive.connections.UsbStatus
 import me.hufman.androidautoidrive.phoneui.DonationRequest
 import me.hufman.androidautoidrive.phoneui.NavHostActivity
 import java.util.*
@@ -42,6 +43,7 @@ class MainService: Service() {
 		const val CONNECTED_PROBE_TIMEOUT: Long = 2 * 60 * 1000     // if Bluetooth is connected
 		const val DISCONNECTED_PROBE_TIMEOUT: Long = 20 * 1000      // if Bluetooth is not connected
 		const val STARTUP_DEBOUNCE = 1500
+		const val SECURITY_RETRY_DELAY = 5000L
 		const val SERVICE_START_DEBOUNCE = 1500
 	}
 
@@ -79,14 +81,35 @@ class MainService: Service() {
 	var shutdownDeferredOnce = false        // whether we rescheduled shutdown after noticing Bluetooth still connected
 	val shutdownTimeout = Runnable {
 		if (!iDriveConnectionReceiver.isConnected || !securityAccess.isConnected()) {
-			if (btStatus.isBTConnected && !shutdownDeferredOnce) {
+			if (carLinkPresent()) {
+				// i3D: the phone is still plugged into or paired with the car, so the link is likely
+				// to come back (MyBMW restarting, a USB blip): keep trying instead of giving up
+				if (!shutdownDeferredOnce) {
+					ConnectionLog.problem("Still waiting for the car link - will keep trying while the phone is connected to the car")
+				}
 				shutdownDeferredOnce = true
 				scheduleShutdownTimeout()
 			} else {
+				ConnectionLog.event("Phone no longer connected to the car, stopping")
 				stopSelf()
 			}
 		}
 	}
+
+	// i3D: whether the phone is still plugged into the car, or connected to it over Bluetooth
+	val usbStatus by lazy { UsbStatus(applicationContext) {}.apply { register() } }
+	fun carLinkPresent(): Boolean = btStatus.isBTConnected || usbStatus.isUsbAccessoryConnected
+
+	// i3D: if MyBMW's security service went away, keep asking for it again
+	val securityRetry: Runnable by lazy { Runnable {
+		if (!securityAccess.isConnected()) {
+			Log.i(TAG, "Security service still missing, reconnecting")
+			securityAccess.connect()
+			handler.postDelayed(securityRetry, SECURITY_RETRY_DELAY)
+		}
+	} }
+	// i3D: what was last written to the connection log, so each change is written once
+	private var loggedState: String? = null
 
 	// triggers repeated BLUETOOTH_UUID responses to the Connected app
 	// which should trigger it to connect to the car
@@ -146,7 +169,10 @@ class MainService: Service() {
 				true)
 
 		val action = intent?.action ?: ""
-		if (action == ACTION_START) {
+		if (action == ACTION_START || intent == null) {
+			// i3D: a null intent means Android restarted this service after stopping it,
+			// so carry on connecting instead of sitting idle until the next drive
+			if (intent == null) ConnectionLog.event("Android restarted the connection service")
 			handleActionStart()
 		} else if (action == ACTION_STOP) {
 			handleActionStop()
@@ -171,6 +197,8 @@ class MainService: Service() {
 
 		carProberThread?.quitSafely()
 		btStatus.unregister()
+		usbStatus.unregister()
+		handler.removeCallbacks(securityRetry)
 
 		backgroundInterruptionDetection.stop()
 
@@ -317,6 +345,9 @@ class MainService: Service() {
 				}
 
 				AppSettings.loadSettings(applicationContext)
+				handler.removeCallbacks(securityRetry)
+				shutdownDeferredOnce = false
+				logState("connected", "Connected to the car (${iDriveConnectionReceiver.brand ?: "unknown brand"})")
 
 				// set the car app languages
 				val locale = if (appSettings[AppSettings.KEYS.FORCE_CAR_LANGUAGE].isNotBlank()) {
@@ -350,6 +381,15 @@ class MainService: Service() {
 				}
 			} else {
 				Log.d(TAG, "Not fully connected: IDrive:${iDriveConnectionReceiver.isConnected} SecurityService:${securityAccess.isConnected()}")
+				if (!securityAccess.isConnected()) {
+					logState("nosecurity", "MyBMW's security service isn't answering - asking again every few seconds")
+					handler.removeCallbacks(securityRetry)
+					handler.postDelayed(securityRetry, SECURITY_RETRY_DELAY)
+				} else if (loggedState == "connected") {
+					logState("dropped", "The car link dropped - reconnecting")
+				} else {
+					logState("waiting", "Waiting for the car link from MyBMW")
+				}
 				if (connectionTime != null) {
 					// record that we successfully disconnected
 					backgroundInterruptionDetection.safelyStop()
@@ -364,6 +404,17 @@ class MainService: Service() {
 			}
 			carInformationUpdater.connectionBrand = iDriveConnectionReceiver.brand
 			carInformationUpdater.isConnected = iDriveConnectionReceiver.isConnected && securityAccess.isConnected()
+		}
+	}
+
+	private fun logState(state: String, message: String) {
+		if (state == loggedState) return
+		loggedState = state
+		when (state) {
+			"connected" -> ConnectionLog.event(message)
+			"dropped" -> ConnectionLog.dropped(message)
+			"waiting" -> ConnectionLog.event(message)
+			else -> ConnectionLog.problem(message)
 		}
 	}
 

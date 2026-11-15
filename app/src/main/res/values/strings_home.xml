@@ -36,6 +36,13 @@
     <string name="home_step_phone">Phone linked to the car</string>
     <string name="home_step_ready">Car link ready</string>
     <string name="home_step_connected">Connected to the car</string>
+    <string name="home_step_onscreen">i3D on the car screen</string>
+    <string name="home_problem">Last problem, %1$s: %2$s. i3D keeps retrying by itself.</string>
+    <string name="home_section_connection">Connection log</string>
+    <string name="home_connlog">Send the connection log</string>
+    <string name="home_connlog_sub">What happened each time the phone tried to connect, so a failed connection can be looked into</string>
+    <string name="home_connlog_clear">Clear the log</string>
+    <string name="home_connlog_clear_sub">Start a fresh log before the next drive</string>
     <string name="home_help">Connection help</string>
     <string name="home_voice">Voice and calendar</string>
     <string name="home_voice_sub">Tap to allow speaking a place, name or reply, and driving to your next appointment</string>

@@ -57,6 +57,7 @@ class CarProber(val securityAccess: SecurityAccess, val settings: AppSettings, v
 		if (!pingCar()) {
 			// car has disconnected
 			Log.i(TAG, "Previously-connected car has disconnected")
+			ConnectionLog.dropped("The car stopped answering - looking for it again")
 			IDriveConnectionStatus.reset()
 			schedule(5000)
 		}
@@ -120,9 +121,11 @@ class CarProber(val securityAccess: SecurityAccess, val settings: AppSettings, v
 	private fun probeCar(host: String, port: Int) {
 		if (!securityAccess.isConnected()) {
 			// try again later after the security service is ready
+			ConnectionLog.problem("Found the car link, but MyBMW's security service isn't ready yet")
 			schedule(2000)
 			return
 		}
+		ConnectionLog.event("Found the car link on port $port, logging in")
 		// try logging in as if it were a bmw or a mini
 		var success = false
 		var errorMessage: String? = null
@@ -178,6 +181,7 @@ class CarProber(val securityAccess: SecurityAccess, val settings: AppSettings, v
 		}
 		if (!success) {
 			Analytics.reportCarProbeFailure(port, errorMessage, errorException)
+			ConnectionLog.problem("The car turned down the login on port $port: ${errorMessage ?: errorException?.javaClass?.simpleName ?: "no reason given"}")
 		}
 	}
 

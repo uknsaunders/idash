@@ -37,9 +37,11 @@ class DashAppService: CarAppService() {
 	var interactionListener: MapsInteractionControllerListener? = null
 
 	override fun shouldStartApp(): Boolean = true
+	override val logName: String = "i3D"
 
 	override fun onCarStart() {
 		Log.i(TAG, "Starting i3 Dash")
+		me.hufman.androidautoidrive.ConnectionLog.event("Starting i3D on the car screen")
 		val handler = this.handler!!
 
 		val cdsData = CDSDataProvider()
@@ -80,6 +82,7 @@ class DashAppService: CarAppService() {
 			override fun openDash() = mapApp.openFullScreen()
 		}
 		mapApp.onCreate(handler)
+		me.hufman.androidautoidrive.ConnectionLog.appShown()
 	}
 
 	override fun onCarStop() {

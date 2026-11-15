@@ -47,13 +47,17 @@ Calls show a panel with the name, number and time. Press the knob to answer, dec
 ![Phone to car connection](docs/images/i3dash/connect-flow.png)
 
 1. Plug the phone into the car's USB port.
-2. Open the app. The card at the top shows three ticks: phone linked, car link ready, connected.
+2. Open the app. The card at the top shows four ticks: phone linked, car link ready, connected, and i3D on the car screen.
 3. If it stops partway, the card shows a hint. A common one is switching the phone's USB mode from charging to file transfer.
 4. On the car, open **ConnectedDrive** and choose **i3D**, the icon with the blue and yellow ring.
 
 ![i3D in the car's menu](docs/screenshots/car-entry.png)
 
 *An illustration of the entry. The car draws its own list, so yours will look a little different, and the label under the icon may not show on every car. Choosing it opens the dash directly.*
+
+If the link drops, i3D reconnects by itself while the phone is still plugged in or paired with the car. It doesn't give up after a couple of minutes, and if i3D's own screen stops while the car is still connected, it is started again (up to six times, waiting longer each time). While it's retrying, the card shows the last problem it hit.
+
+If it still won't connect, use **Send the connection log** on the home screen. It lists each step of every attempt (link found, login, i3D started, link dropped), so the failing step can be found. **Clear the log** before a test drive gives a clean record.
 
 If it sits on "waiting for car connection", close the BMW Connected app, restart the phone and the car, then plug in again.
 

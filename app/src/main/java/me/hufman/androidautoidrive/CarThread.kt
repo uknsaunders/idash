@@ -19,11 +19,31 @@ class CarThread(name: String, var runnable: () -> (Unit)): Thread(name) {
 	var handler: Handler? = null
 	val iDriveConnectionObserver = IDriveConnectionObserver()
 
+	/** i3D: told when the thread ends without being asked to, with what stopped it, so the app can be started again */
+	var onUnexpectedEnd: ((String) -> Unit)? = null
+	@Volatile private var quitRequested = false
+	private var endReason: String? = null
+
 	init {
 		isDaemon = true
 	}
 
 	override fun run() {
+		try {
+			run2()
+		} catch (e: Throwable) {
+			endReason = e.toString()
+			throw e
+		} finally {
+			if (!quitRequested) {
+				val reason = endReason ?: "it finished unexpectedly"
+				ConnectionLog.problem("$name stopped: $reason")
+				try { onUnexpectedEnd?.invoke(reason) } catch (e: Exception) { Log.w(TAG, "Problem while restarting $name", e) }
+			}
+		}
+	}
+
+	private fun run2() {
 		try {
 			Looper.prepare()
 			handler = Handler(Looper.myLooper()!!)
@@ -35,18 +55,23 @@ class CarThread(name: String, var runnable: () -> (Unit)): Thread(name) {
 		} catch (e: IllegalStateException) {
 			// posted to a dead handler
 			Log.i(TAG, "Shutting down thread $name due to IllegalStateException: $e", e)
+			endReason = e.toString()
 		} catch (e: org.apache.etch.util.TimeoutException) {
 			// phone was unplugged during an RPC command
 			Log.i(TAG, "Shutting down thread $name due to Etch TimeoutException")
+			endReason = "the car stopped answering"
 		} catch (e: RuntimeException) {
 			// phone was unplugged during an RPC command
 			Log.i(TAG, "Shutting down thread $name due to RuntimeException: $e", e)
+			endReason = e.toString()
 		} catch (e: IOException) {
 			val cause = e.cause
+			endReason = (cause ?: e).toString()
 			if (!iDriveConnectionObserver.isConnected) {
 				// the car is no longer connected
 				// so this is most likely a crash caused by the closed connection
 				Log.i(TAG, "Shutting down thread $name due to disconnection")
+				endReason = "the car disconnected"
 			} else if (cause is org.apache.etch.util.TimeoutException) {
 				Log.i(TAG, "Shutting down thread $name due to Etch TimeoutException")
 			} else if (cause is RuntimeException) {
@@ -57,6 +82,7 @@ class CarThread(name: String, var runnable: () -> (Unit)): Thread(name) {
 				// and so the car complains that the app is already connected
 				// so shut down the thread for now and wait for MainService to start this app module again
 				Log.i(TAG, "RHMI application was already connected, perhaps from a previous partial connection, shutting down thread $name")
+				endReason = "the car still had it from a previous connection"
 			} else {
 				throw(e)
 			}
@@ -73,11 +99,13 @@ class CarThread(name: String, var runnable: () -> (Unit)): Thread(name) {
 	}
 
 	fun quit() {
+		quitRequested = true
 		handler?.looper?.quit()
 		handler = null      // no longer useful
 	}
 
 	fun quitSafely() {
+		quitRequested = true
 		handler?.looper?.quitSafely()
 		handler = null      // no longer useful
 	}

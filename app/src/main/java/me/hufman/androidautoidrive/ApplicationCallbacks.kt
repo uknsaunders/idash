@@ -24,6 +24,7 @@ class ApplicationCallbacks: Application(), Application.ActivityLifecycleCallback
 
 		registerActivityLifecycleCallbacks(this)
 		recordCrashes()
+		ConnectionLog.init(this)
 	}
 
 	/** Keeps the details of the last crash in a file, so the home screen can offer to share it */

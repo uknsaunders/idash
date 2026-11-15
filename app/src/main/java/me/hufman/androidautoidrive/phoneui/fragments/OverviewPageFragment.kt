@@ -19,6 +19,7 @@ import android.content.res.ColorStateList
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import me.hufman.androidautoidrive.ConnectionLog
 import me.hufman.androidautoidrive.R
 import me.hufman.androidautoidrive.carapp.dash.SendDestinationActivity
 import me.hufman.androidautoidrive.phoneui.viewmodels.ConnectionStatusModel
@@ -29,6 +30,10 @@ class OverviewPageFragment: Fragment() {
 	private val viewModel by activityViewModels<ConnectionStatusModel> { ConnectionStatusModel.Factory(requireContext().applicationContext) }
 
 	private class Tile(val icon: Int, val title: Int, val sub: Int, val mark: String = "›", val action: () -> Unit)
+
+	companion object {
+		const val PROBLEM_SHOWN_FOR = 30 * 60 * 1000L
+	}
 
 	override fun onResume() {
 		super.onResume()
@@ -106,6 +111,8 @@ class OverviewPageFragment: Fragment() {
 		val step1 = view.findViewById<TextView>(R.id.step1)
 		val step2 = view.findViewById<TextView>(R.id.step2)
 		val step3 = view.findViewById<TextView>(R.id.step3)
+		val step4 = view.findViewById<TextView>(R.id.step4)
+		val statusProblem = view.findViewById<TextView>(R.id.statusProblem)
 		val openConnection = View.OnClickListener { findNavController().navigate(R.id.nav_connection) }
 		view.findViewById<View>(R.id.statusCard).setOnClickListener(openConnection)
 		view.findViewById<Button>(R.id.btnHelp).setOnClickListener(openConnection)
@@ -118,8 +125,26 @@ class OverviewPageFragment: Fragment() {
 			step1.text = mark(linked, R.string.home_step_phone)
 			step2.text = mark(ready, R.string.home_step_ready)
 			step3.text = mark(connected, R.string.home_step_connected)
+			// i3D's own screen in the car: the last step, and the one that was failing silently
+			val onScreen = connected && ConnectionLog.appShownTime > 0 && ConnectionLog.appShownTime >= ConnectionLog.droppedTime
+			step4.text = mark(onScreen, R.string.home_step_onscreen)
+			val problem = ConnectionLog.lastProblem
+			val recent = System.currentTimeMillis() - ConnectionLog.lastProblemTime < PROBLEM_SHOWN_FOR
+			if (!onScreen && problem != null && recent) {
+				val time = java.text.SimpleDateFormat("HH:mm", java.util.Locale.UK).format(java.util.Date(ConnectionLog.lastProblemTime))
+				statusProblem.text = ctx.getString(R.string.home_problem, time, problem)
+				statusProblem.visibility = View.VISIBLE
+			} else {
+				statusProblem.visibility = View.GONE
+			}
 		}
 		refreshSteps()
+		// the connection log changes from the connection service's threads
+		val logListener: () -> Unit = { view.post { if (isAdded) { refreshSteps(); view.findViewById<LinearLayout>(R.id.tiles)?.let { buildTiles(it) } } } }
+		ConnectionLog.addListener(logListener)
+		viewLifecycleOwner.lifecycle.addObserver(object: androidx.lifecycle.DefaultLifecycleObserver {
+			override fun onDestroy(owner: androidx.lifecycle.LifecycleOwner) { ConnectionLog.removeListener(logListener) }
+		})
 
 		viewModel.carConnectionText.observe(viewLifecycleOwner, Observer { text ->
 			statusTitle.text = text(ctx)
@@ -165,6 +190,24 @@ class OverviewPageFragment: Fragment() {
 			}))
 			container.addView(tileView(ctx, Tile(R.drawable.ic_settings_feather, R.string.home_crash_clear, R.string.home_crash_clear_sub, "×") {
 				crashFile.delete()
+				buildTiles(container)
+			}))
+		}
+
+		// what happened while connecting, to send when the car connection misbehaves
+		if (!ConnectionLog.isEmpty()) {
+			container.addView(sectionLabel(ctx, R.string.home_section_connection))
+			container.addView(tileView(ctx, Tile(R.drawable.ic_send_feather, R.string.home_connlog, R.string.home_connlog_sub) {
+				try {
+					val report = "i3D ${me.hufman.androidautoidrive.BuildConfig.VERSION_NAME} on Android ${android.os.Build.VERSION.RELEASE} (${android.os.Build.MODEL})\n\n" + ConnectionLog.text().takeLast(30000)
+					startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain")
+						.putExtra(Intent.EXTRA_SUBJECT, "i3D connection log").putExtra(Intent.EXTRA_TEXT, report), getString(R.string.home_connlog)))
+				} catch (e: Exception) {
+					// nothing to share with
+				}
+			}))
+			container.addView(tileView(ctx, Tile(R.drawable.ic_settings_feather, R.string.home_connlog_clear, R.string.home_connlog_clear_sub, "×") {
+				ConnectionLog.clear()
 				buildTiles(container)
 			}))
 		}

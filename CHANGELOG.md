@@ -3,6 +3,15 @@
 Newest first. The app is built automatically and published as `i3-dash.apk` on the
 [`i3dash-latest` release](https://github.com/uknsaunders/idash/releases/tag/i3dash-latest), so the date below is when each change was made.
 
+## 15 November 2026, reconnecting by itself, and a connection log
+
+- **Keeps trying while you're connected to the car:** the connection service used to give up after 20 seconds to 2 minutes without a car link. It now keeps trying for as long as the phone is plugged into the car or paired with it over Bluetooth, and stops only when it isn't.
+- **Restarts after Android stops it:** if Android stopped the connection service and started it again, the service used to sit idle until the next drive. It now carries on connecting.
+- **Asks MyBMW again:** if MyBMW's security service stops answering, i3D asks for it again every 5 seconds instead of waiting.
+- **Brings i3D's screen back:** if i3D's car screen stops by itself while the car is still connected (a blip in the link, or the car still holding the app from a moment before), it is started again after 3 seconds, then 6, 12 and so on, up to six times. The other AAIdrive car apps get the same treatment.
+- **Connection log:** each step (link found, login, i3D on the car screen, link dropped, restarts) is recorded on the phone. The home screen shows the last problem while it retries, a fourth tick for "i3D on the car screen", and **Send the connection log** / **Clear the log** tiles. Before, a failure at the last step left no trace.
+- Not yet tried in the car.
+
 ## 14 November 2026, Settings as cards, Resume always bottom-left, what3words plan note
 
 - **Settings opens as cards:** the Settings tile now goes straight to cards (Display, Car colour, Battery, Video), like Call and Music.
