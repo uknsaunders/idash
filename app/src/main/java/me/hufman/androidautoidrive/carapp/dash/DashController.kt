@@ -383,6 +383,15 @@ class DashController(val context: Context,
 
 	private var music: DashMusic? = null
 	private fun music(): DashMusic = music ?: DashMusic(context).also { music = it }
+
+	// i3D's own player, for radio and podcasts chosen in the car
+	private var audio: DashAudio? = null
+	private fun audio(): DashAudio = audio ?: DashAudio(context).also {
+		it.onProblem = { message -> js("window.i3toast && window.i3toast(${JSONObject.quote(message)})") }
+		audio = it
+	}
+	/** Whether the now-playing details come from i3D's own player rather than another app */
+	@Volatile private var mediaIsOwn = false
 	override fun musicReset() { try { music().reset() } catch (e: Exception) { Log.w(TAG, "Music reset failed", e) } }
 	override fun musicRows(): List<String> = try { music().rows() } catch (e: Exception) { Log.w(TAG, "Music rows failed", e); emptyList() }
 	override fun musicPick(row: Int): Boolean = try { music().pick(row) } catch (e: Exception) { Log.w(TAG, "Music pick failed", e); false }
@@ -813,18 +822,35 @@ class DashController(val context: Context,
 			position += ((SystemClock.elapsedRealtime() - state.lastPositionUpdateTime) * state.playbackSpeed).toLong()
 		}
 		val duration = metadata.getLong(MediaMetadata.METADATA_KEY_DURATION)
-		val appName = try {
+		val own = controller.packageName == context.packageName && audio?.current != null
+		mediaIsOwn = own
+		val ownItem = if (own) audio?.current else null
+		val appName = if (ownItem != null) {
+			if (ownItem.optString("kind") == "station") "Radio" else "Podcast"
+		} else try {
 			val pm = context.packageManager
 			pm.getApplicationLabel(pm.getApplicationInfo(controller.packageName, 0)).toString()
 		} catch (e: Exception) { controller.packageName }
 		val media = JSONObject()
 		media.put("title", title)
-		media.put("artist", metadata.getString(MediaMetadata.METADATA_KEY_ARTIST) ?: metadata.getString(MediaMetadata.METADATA_KEY_ALBUM_ARTIST) ?: "")
+		media.put("artist", (if (ownItem != null) audio?.nowLine else null)
+			?: metadata.getString(MediaMetadata.METADATA_KEY_ARTIST) ?: metadata.getString(MediaMetadata.METADATA_KEY_ALBUM_ARTIST) ?: "")
+		if (ownItem != null) {
+			media.put("mine", true)
+			media.put("live", ownItem.optString("kind") == "station")
+			media.put("item", ownItem)
+		}
 		media.put("album", metadata.getString(MediaMetadata.METADATA_KEY_ALBUM) ?: "")
 		media.put("app", appName)
 		media.put("playing", isPlaying)
 		media.put("pos", (position / 1000) * 1000)
 		media.put("dur", if (duration > 0) duration else 0)
+		if (ownItem != null) {
+			// the player knows its own position better than the session snapshot
+			val (at, length) = audio?.progress() ?: Pair(0L, 0L)
+			media.put("pos", (at / 1000) * 1000)
+			media.put("dur", length)
+		}
 		data["media"] = media
 
 		// cover art: sent when the track changes, and retried each second until the app supplies a picture
@@ -939,6 +965,8 @@ class DashController(val context: Context,
 		try { worker.shutdownNow() } catch (e: Exception) { Log.w(TAG, "Couldn't stop the background jobs", e) }
 		try { music?.close() } catch (e: Exception) { Log.w(TAG, "Music close failed", e) }
 		music = null
+		try { audio?.release() } catch (e: Exception) { Log.w(TAG, "Couldn't stop the player", e) }
+		audio = null
 		try { scope.cancel() } catch (e: Exception) { Log.w(TAG, "Couldn't cancel the page jobs", e) }
 		handler.post {
 			try { presentation?.dismiss() } catch (e: Exception) { Log.w(TAG, "Couldn't close the page", e) }
@@ -1029,6 +1057,7 @@ class DashController(val context: Context,
 		/** toggle, next or prev on whatever is playing */
 		@JavascriptInterface
 		fun media(command: String) {
+			if (mediaIsOwn) { audio().command(command); return }
 			try {
 				val controls = mediaController?.transportControls ?: return
 				when (command) {
@@ -1071,9 +1100,46 @@ class DashController(val context: Context,
 			}
 		}
 
+		/** A list of radio stations or podcasts for the car's tiles. The answer arrives as window.i3audio({kind, arg, items, error}) */
+		@JavascriptInterface
+		fun audioList(kind: String, arg: String) {
+			background {
+				val answer = DashAudioSources.list(kind, arg)
+				val json = JSONObject().put("kind", kind).put("arg", arg).put("items", answer.items)
+				if (answer.error != null) json.put("error", answer.error)
+				// how far into each episode, for the "continue" marks
+				if (kind == "episodes") {
+					for (i in 0 until answer.items.length()) {
+						val item = answer.items.getJSONObject(i)
+						val at = audio().savedPosition(item.optString("url"))
+						if (at > 0) item.put("resume", at)
+					}
+				}
+				js("window.i3audio && window.i3audio($json)")
+			}
+		}
+
+		/** Plays a station or episode chosen in the car, on i3D's own player */
+		@JavascriptInterface
+		fun audioPlay(item: String) {
+			val json = try { JSONObject(item) } catch (e: Exception) { return }
+			audio().play(json)
+			if (json.optString("kind") == "station") background { DashAudioSources.countClick(json.optString("id")) }
+		}
+
+		/** Stops i3D's own player */
+		@JavascriptInterface
+		fun audioStop() { audio?.command("stop") }
+
+		/** toggle, fwd or back on i3D's own player, straight away (before the phone's now-playing catches up) */
+		@JavascriptInterface
+		fun audioCommand(command: String) { audio?.command(command) }
+
 		/** Opens an app or folder, or plays a playlist or track. The answer arrives as window.i3music(...) */
 		@JavascriptInterface
 		fun musicPick(row: Int) {
+			// choosing a phone app: stop i3D's own radio or podcast so they don't play over each other
+			try { if (music().atTop()) audio?.pause() } catch (e: Exception) { }
 			background {
 				val played = try { music().pick(row) } catch (e: Exception) { Log.w(TAG, "Music pick failed", e); false }
 				sendMusic(played)

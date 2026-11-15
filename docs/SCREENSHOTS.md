@@ -33,8 +33,23 @@ Shown when a contact has more than one.
 ![Number list](screenshots/menu-call-numbers.png)
 
 ### Music
-Cards: your apps first, with **Resume** - what was last playing - as a later card, not the first thing offered.
-![Music cards](screenshots/menu-music.png)
+Two groups. **Choose in the car**: Radio and Podcasts, played by i3D itself. **Start on your phone when parked**: Spotify, Amazon Music, BBC Sounds and the rest, which only let approved apps list their music. What was last playing is the mini player at the bottom left.
+![Music](screenshots/music-top.png)
+
+### Radio
+Ways in first (speak a station, near you, UK top, genres), then your saved and recent stations.
+![Radio](screenshots/music-radio.png)
+![Stations near you](screenshots/music-stations.png)
+
+### Now playing: radio
+Pause, stop and save the station. The song the station says it is playing shows under its name.
+![Now playing: radio](screenshots/music-now-radio.png)
+
+### Podcasts
+The UK charts, a show's episodes (with the ones you've started marked), and the now-playing screen with back 15 seconds and on 30 seconds.
+![Podcast chart](screenshots/music-podcasts.png)
+![Episodes](screenshots/music-episodes.png)
+![Now playing: podcast](screenshots/music-now-podcast.png)
 
 ### During a call
 A short list. Hang up is first.

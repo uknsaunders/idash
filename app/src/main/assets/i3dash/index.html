@@ -138,6 +138,60 @@ aside{position:relative;padding:8px 10px;display:flex;flex-direction:column;gap:
 .cardbox.tight .card .cx{font-size:16px;margin-top:1px}
 .card.dim{opacity:.55}
 .card.dim svg{stroke:var(--muted)}
+/* the music screens: artwork tiles like a streaming app, and a full now-playing screen */
+.msc{position:absolute;inset:0;z-index:9;background:linear-gradient(180deg,var(--bg2),var(--bg));padding:8px 16px 10px;display:flex;flex-direction:column;gap:4px;overflow:hidden}
+.msc .mh{display:flex;align-items:baseline;justify-content:space-between;font:700 27px var(--f-d);padding:0 4px 2px}
+.msc .mh small{font:500 17px var(--f-b);color:var(--muted)}
+.tgrid{--art:118px;display:grid;grid-template-columns:repeat(auto-fill,minmax(calc(var(--art) + 22px),1fr));gap:4px 8px;align-content:start;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+.tgrid::-webkit-scrollbar,.erows::-webkit-scrollbar{display:none}
+/* the Music top level: compact chips with a picture on the left, like a streaming app's home */
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 10px;align-content:start;flex:1;min-height:0;overflow-y:auto;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{display:flex;align-items:center;gap:12px;min-width:0;border-radius:11px;border:2px solid var(--line);background:linear-gradient(180deg,var(--panel2),var(--panel));padding:6px 12px 6px 6px;height:76px;box-sizing:border-box}
+.chip .ca{width:60px;height:60px;flex:none;border-radius:8px;display:grid;place-items:center;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--g1,#2b5fb8),var(--g2,#123064))}
+.chip .ca svg{width:58%;height:58%;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.chip .ca .in{font:800 28px var(--f-d);color:#fff}
+.chip>div:last-child{min-width:0}.chip .tt{font:700 21px var(--f-d);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chip .ts{font:500 15px var(--f-b);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip.on{background:linear-gradient(180deg,var(--accent2),var(--accent));border-color:var(--edge);color:var(--accent-ink)}.chip.on .ts{color:var(--accent-ink)}
+.chip.dim{opacity:.5}
+.glabel{grid-column:1/-1;font:700 15px var(--f-b);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);padding:6px 6px 0}
+.tile{border-radius:12px;padding:7px;display:flex;flex-direction:column;gap:5px;min-width:0;border:2px solid transparent}
+.tile .ta{width:var(--art);height:var(--art);margin:0 auto;border-radius:10px;overflow:hidden;display:grid;place-items:center;position:relative;box-shadow:0 4px 14px rgba(0,0,0,.35);background:linear-gradient(135deg,var(--g1,#2b5fb8),var(--g2,#123064))}
+.tile .ta img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tile .ta img.fv{object-fit:contain;background:#fff;padding:8%;box-sizing:border-box}
+.tile .ta svg{width:46%;height:46%;stroke:#fff;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tile .ta .in{font:800 calc(var(--art) * .36) var(--f-d);color:#fff}
+.tile .tt{font:700 19px var(--f-d);line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 2px}
+.tile .ts{font:500 15px var(--f-b);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 2px;margin-top:-3px}
+.tile.on{background:linear-gradient(180deg,var(--accent2),var(--accent));border-color:var(--edge);color:var(--accent-ink)}
+.tile.on .ts{color:var(--accent-ink)}
+.tile.dim{opacity:.5}
+.tile .tp{position:absolute;left:8px;right:8px;bottom:8px;height:5px;border-radius:3px;background:rgba(0,0,0,.5)}.tile .tp b{display:block;height:100%;border-radius:3px;background:#fff}
+.erows{display:flex;flex-direction:column;gap:6px;flex:1;min-height:0;overflow-y:auto;scrollbar-width:none}
+.erow{display:flex;align-items:center;gap:14px;border-radius:10px;padding:5px 10px;border:2px solid transparent;flex:none}
+.erow img,.erow .ea{width:62px;height:62px;border-radius:8px;object-fit:cover;flex:none;background:var(--panel2);display:grid;place-items:center}
+.erow .ea svg{width:30px;height:30px;stroke:var(--hi);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.erow>div{min-width:0;flex:1}.erow .tt{font:600 22px var(--f-b);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.erow .ts{font:500 16px var(--f-b);color:var(--muted)}
+.erow.on{background:linear-gradient(180deg,var(--accent2),var(--accent));border-color:var(--edge);color:var(--accent-ink)}.erow.on .ts{color:var(--accent-ink)}.erow.on .ea svg{stroke:var(--accent-ink)}
+.erow.dim{opacity:.55}
+.mini{display:flex;align-items:center;gap:12px;width:50%;border-radius:12px;padding:6px 12px;border:2px solid var(--line);background:linear-gradient(180deg,var(--panel2),var(--panel));flex:none}
+.mini img{width:52px;height:52px;border-radius:7px;object-fit:cover;flex:none;background:var(--panel2)}
+.mini>div{min-width:0;flex:1}.mini .tt{font:700 20px var(--f-d);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mini .ts{font:500 15px var(--f-b);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .st{font:700 24px var(--f-d);color:var(--hi)}
+.mini.on{background:linear-gradient(180deg,var(--accent2),var(--accent));border-color:var(--edge);color:var(--accent-ink)}.mini.on .ts,.mini.on .st{color:var(--accent-ink)}
+.now{display:flex;gap:34px;align-items:center;flex:1;min-height:0;padding:4px 10px}
+.now .nart{width:340px;height:340px;flex:none;border-radius:16px;overflow:hidden;box-shadow:0 10px 34px rgba(0,0,0,.5);background:linear-gradient(135deg,#2b5fb8,#123064);display:grid;place-items:center}
+.now .nart img{width:100%;height:100%;object-fit:cover}.now .nart svg{width:40%;height:40%;stroke:#fff;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.now .ni{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.now .ns{font:700 16px var(--f-b);letter-spacing:.09em;text-transform:uppercase;color:var(--hi)}
+.now .nt{font:700 44px var(--f-d);line-height:1.08;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.now .na{font:500 26px var(--f-b);color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nb{display:flex;gap:18px;margin-top:14px}
+.nb .b{display:flex;flex-direction:column;align-items:center;gap:6px;width:104px}
+.nb .c{width:78px;height:78px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line);background:linear-gradient(180deg,var(--panel2),var(--panel))}
+.nb .c svg{width:40px;height:40px;stroke:var(--ink);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.nb .l{font:600 15px var(--f-b);color:var(--muted);white-space:nowrap}
+.nb .b.on .c{background:linear-gradient(180deg,var(--accent2),var(--accent));border-color:var(--edge)}.nb .b.on .c svg{stroke:var(--accent-ink)}.nb .b.on .l{color:var(--ink)}
 .toast{position:absolute;left:50%;bottom:64px;transform:translateX(-50%);z-index:10;font:600 22px var(--f-b);background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:8px 18px;white-space:nowrap}
 /* the home screen: one card for each part of the app */
 .home{position:absolute;inset:0;z-index:11;background:linear-gradient(180deg,var(--bg2),var(--bg));display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr);gap:10px;padding:10px 4px 6px}
@@ -212,6 +266,7 @@ body.daymap .maplibregl-ctrl-attrib{background:rgba(255,255,255,.7)!important;co
     </section>
     <div class="home" id="home" hidden></div>
     <div class="menu" id="menu" hidden></div>
+    <div class="msc" id="msc" hidden></div>
     <div class="toast" id="toast" hidden></div>
     <div class="banner" id="banner" hidden></div>
   </div>
@@ -226,7 +281,7 @@ const _c=new Map();
 function T(sel,v){v=String(v);if(_c.get(sel+'t')===v)return;_c.set(sel+'t',v);$(sel).textContent=v}
 function H(sel,v){v=String(v);if(_c.get(sel+'h')===v)return;_c.set(sel+'h',v);$(sel).innerHTML=v}
 function S(el,k,v){if(el.style[k]!==v)el.style[k]=v}
-const N=window.I3Native||{speak(){},log(){},navigationEnded(){},menu(){return '{}'},navStarted(){},search(){},answer(){},hangup(){},dial(){},media(){},musicOpen(){},musicPick(){},video(){return 'nocar'}};
+const N=window.I3Native||{speak(){},log(){},navigationEnded(){},menu(){return '{}'},navStarted(){},search(){},answer(){},hangup(){},dial(){},media(){},musicOpen(){},musicPick(){},audioList(){},audioPlay(){},audioStop(){},audioCommand(){},video(){return 'nocar'}};
 const log=m=>{try{N.log(String(m))}catch(e){}};
 const store={get(k,d){try{const v=localStorage.getItem('i3.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('i3.'+k,JSON.stringify(v))}catch(e){}}};
 
@@ -277,6 +332,7 @@ window.i3feed=function(d){
   if(D.units){const [dd,tt]=String(D.units).split(',');miles=dd==='Miles';fahr=tt==='FAHRENHEIT'}
   journeyTick();render();
   if(D.lat!=null)onPosition(D.lat,D.lon,D.heading);
+  if(menu&&(menu.kind==='now'||menu.top))drawMenu();     // the now-playing screen and mini player follow the music
 };
 
 /* ---------- pages, turned with the iDrive knob ---------- */
@@ -570,13 +626,17 @@ function openMenu(title,items,sel,wait){$('#toast').hidden=true;menu={title,item
 // never for scrolling a long list of names (that stays a list, see openMenu)
 function openCardMenu(title,items,sel){$('#toast').hidden=true;menu={title,items,sel:Math.min(sel||0,items.length-1),kind:'cards'};drawMenu();menuAlive()}
 function closeMenu(){menu=null;clearTimeout(menuTimer);drawMenu()}
-function menuAlive(){clearTimeout(menuTimer);menuTimer=setTimeout(closeMenu,MENU_IDLE_MS)}
+// the now-playing screen stays up; the music tiles get longer than a list, since there is more to look at
+function menuAlive(){clearTimeout(menuTimer);const ms=menu&&menu.kind==='now'?0:menu&&menu.kind==='tiles'?45000:MENU_IDLE_MS;if(ms)menuTimer=setTimeout(closeMenu,ms)}
 function drawMenu(){
   const el=$('#menu'),body=$('#body');
   if(body.classList.contains('menuopen')!==!!menu){   // on the Map page the map gives up its left half to the menu
     body.classList.toggle('menuopen',!!menu);showPage();
   }
+  const ms=$('#msc'),full=!!menu&&(menu.kind==='tiles'||menu.kind==='now');
+  if(ms.hidden===full)ms.hidden=!full;
   if(!menu){if(!el.hidden)el.hidden=true;return}
+  if(full){if(!el.hidden)el.hidden=true;drawMusicScreen();return}
   if(el.hidden)el.hidden=false;
   if(menu.kind==='cards'){
     // a card flagged bl:1 (eg. Resume) is pinned to the bottom-left cell: fix the row count
@@ -696,39 +756,201 @@ function everyoneMenu(){
   if(cut)it.push({label:'The full list shows when parked',dim:1});
   openMenu('All contacts',it,1);
 }
-// top level: choose your app first. What was last playing is offered too, but as a secondary
-// card at the end, not the first thing you see - the service picker is the main action.
-function musicMenu(){waiting('Music apps');N.musicOpen()}
+/* ---------- music ----------
+   Two kinds of source, shown in two groups:
+   - chosen in the car: radio and podcasts, from open directories, played by i3D's own player on the phone
+   - started on the phone when parked: Spotify, Amazon Music, BBC Sounds and the rest only list their
+     music for apps they approve, so they're picked on the phone; the car then shows and controls them.
+   The screens look like a streaming app: artwork tiles, a mini player at the bottom left for whatever
+   was last playing, and a full now-playing screen with the controls on the knob. */
+const GENRES=['Pop','Rock','News','Talk','Classical','Jazz','Dance','Country','80s','Christian','Sport','Chill'];
+const RECENT_MAX=12,FAV_MAX=24;
+function openTiles(title,items,sel,opts){$('#toast').hidden=true;menu=Object.assign({title,items,sel:Math.min(sel||0,Math.max(0,items.length-1)),kind:'tiles'},opts||{});drawMenu();menuAlive()}
+// saved stations, followed shows and recently played, kept in the car page's own storage
+const keep=(k,item,max)=>{const l=store.get(k,[]).filter(x=>x.id!==item.id);l.unshift(item);store.set(k,l.slice(0,max))};
+const has=(k,id)=>store.get(k,[]).some(x=>x.id===id);
+function toggle(k,item){if(has(k,item.id)){store.set(k,store.get(k,[]).filter(x=>x.id!==item.id));return false}keep(k,item,FAV_MAX);return true}
+window.i3toast=t=>toast(t);
+
+// top level: the two groups, then the mini player for what was last playing
+let phoneApps=null;       // the phone's music apps, as last listed by the phone
+function musicMenu(sel){musicTop(sel);N.musicOpen()}
+function musicTop(sel){
+  const favs=store.get('radio.favs',[]),subs=store.get('pod.subs',[]);
+  const it=[{label:'‹ Home',icon:'Home',group:'Choose in the car',act:goHome},
+    {label:'Radio',icon:'Radio',note:favs.length?favs.length+' saved':'Near you & UK',act:()=>radioMenu()},
+    {label:'Podcasts',icon:'Podcast',note:subs.length?subs.length+' shows':'UK top shows',act:()=>podcastMenu()}];
+  if(menuData().videos.length)it.push({label:'Video',icon:'Video',note:'parked only',act:videoMenu});
+  const grp=moving()?'Pull over to choose these on your phone':'Start on your phone when parked, then control here';
+  if(phoneApps===null)it.push({label:'Finding apps…',icon:'Music',group:grp,dim:1});
+  else if(!phoneApps.length)it.push({label:'No music apps found',icon:'Music',group:grp,dim:1});
+  else phoneApps.forEach((label,i)=>{const name=String(label).replace(/ \(playing\)$/,''),on=/\(playing\)$/.test(label);
+    it.push({label:name,initial:1,group:i?undefined:grp,note:on?'playing now':'on the phone',act(){waiting(name);N.musicPick(i)}})});
+  const m=D.media;
+  if(m&&m.title)it.push({mini:1,label:m.title,act:()=>nowMenu(()=>musicMenu())});
+  openTiles('Music',it,sel==null?1:sel,{top:true});
+}
 // the phone answers musicOpen and musicPick here
 window.i3music=function(r){
   if(r.played){if(menu&&menu.wait)closeMenu();toast('Playing');return}
+  if(r.top){
+    phoneApps=(r.rows||[]).filter(x=>x!=='No music apps found');
+    if(menu&&(menu.top||menu.wait))musicTop(menu.top?menu.sel:undefined);
+    return;
+  }
   if(!menu||!menu.wait)return;      // the driver moved on while it was loading
-  if(r.top){musicTopCards(r.rows||[]);return}
-  // inside one app's own browse tree: playlists, albums, tracks - a scrollable list, not cards
+  // inside one phone app's own folders: a scrollable list
   const it=[backTo(musicMenu)];
   (r.rows||[]).forEach((label,i)=>it.push({label,act(){waiting(menu.title);N.musicPick(i)}}));
   openMenu(menu.title,it,it.length>1?1:0);
 };
-function musicTopCards(rows){
-  const cards=[{label:'‹ Home screen',icon:'Home',act:goHome}];
-  const none=!rows.length||rows[0]==='No music apps found';
-  if(none)cards.push({label:'No music apps found',icon:'Music',dim:1});
-  else rows.forEach((label,i)=>{const name=String(label).replace(/ \(playing\)$/,'');
-    cards.push({label:name,icon:'Music',note:/\(playing\)$/.test(label)?'playing now':'',act(){waiting(name);N.musicPick(i)}})});
-  const m=D.media;
-  if(m&&m.title)cards.push({label:'Resume',icon:'Resume',note:m.title,bl:1,act:resumeMenu});
-  if(menuData().videos.length)cards.push({label:'Video',icon:'Video',note:'parked only',act:videoMenu});
-  openCardMenu('Music',cards,cards.length>1?1:0);
+
+// radio: ways in first, then saved and recent stations
+const stationTile=(x,group,back)=>({label:x.title,note:x.sub,art:x.art,icon:'Radio',fav:1,group,act(){playItem(x,back)}});
+function radioMenu(sel){
+  const it=[{label:'‹ Music',icon:'Back',act:()=>musicMenu(1)},
+    {label:'Speak a station',icon:'Voice',note:'say its name',act(){hear('radio')}},
+    {label:'Near you',icon:'Near',note:'local stations',act(){loadList('near',JSON.stringify(pos?{lat:pos[1],lon:pos[0]}:{}),'Near you',radioMenu)}},
+    {label:'UK top',icon:'Chart',note:'most played',act(){loadList('uk','','UK top stations',radioMenu)}},
+    {label:'Genres',icon:'Tag',note:GENRES.slice(0,3).join(', ')+'…',act:genreMenu}];
+  const first=it.length,favs=store.get('radio.favs',[]),rec=store.get('radio.recent',[]).filter(x=>!favs.some(f=>f.id===x.id));
+  favs.forEach((x,i)=>it.push(stationTile(x,i?undefined:'Your stations',()=>radioMenu())));
+  rec.forEach((x,i)=>it.push(stationTile(x,i?undefined:'Recently played',()=>radioMenu())));
+  openTiles('Radio',it,sel!=null?sel:it.length>first?first:2);
 }
-// continue, pause or skip whatever was last playing, without choosing an app again
-function resumeMenu(){
-  const m=D.media,it=[backTo(musicMenu)];
-  if(m&&m.title)it.push({label:m.playing?'Pause':'Play',note:m.title,act(){N.media('toggle');closeMenu()}},
-    {label:'Next track',act(){N.media('next');menuAlive()}},{label:'Previous track',act(){N.media('prev');menuAlive()}},
-    {label:'Forward 30 seconds',act(){N.media('fwd');menuAlive()}},{label:'Back 15 seconds',act(){N.media('back');menuAlive()}});
-  else it.push({label:'Nothing was playing',dim:1});
-  openMenu('Resume',it,1);
+function genreMenu(){
+  const it=[{label:'‹ Radio',icon:'Back',act:()=>radioMenu(4)}];
+  GENRES.forEach(g=>it.push({label:g,icon:'Tag',act(){loadList('genre',g,g+' radio',genreMenu)}}));
+  openTiles('Genres',it,1);
 }
+
+// podcasts: ways in, then episodes to carry on with, then followed shows
+const showTile=(x,group)=>({label:x.title,note:x.sub,art:x.art,icon:'Podcast',group,act(){loadList('episodes',JSON.stringify(x),x.title,podcastMenu)}});
+const showOf=e=>({kind:'podcast',id:e.feed,title:e.show,sub:'',art:e.art,feed:e.feed});
+const follows=feed=>store.get('pod.subs',[]).some(x=>x.id===feed||(x.feed&&x.feed===feed));
+function follow(show){
+  if(follows(show.feed)){store.set('pod.subs',store.get('pod.subs',[]).filter(x=>x.id!==show.feed&&x.feed!==show.feed));toast('Unfollowed '+show.title);return}
+  keep('pod.subs',Object.assign({},show,{id:show.feed}),FAV_MAX);toast('Following '+show.title);
+}
+function podcastMenu(sel){
+  const it=[{label:'‹ Music',icon:'Back',act:()=>musicMenu(2)},
+    {label:'Speak a show',icon:'Voice',note:'say its name',act(){hear('podcast')}},
+    {label:'UK top shows',icon:'Chart',note:'from the charts',act(){loadList('charts','','UK top podcasts',podcastMenu)}}];
+  const first=it.length,rec=store.get('pod.recent',[]),subs=store.get('pod.subs',[]);
+  rec.slice(0,6).forEach((e,i)=>it.push({label:e.title,note:e.show,art:e.art,icon:'Podcast',group:i?undefined:'Continue listening',act(){playItem(e,()=>podcastMenu())}}));
+  subs.forEach((x,i)=>it.push(showTile(x,i?undefined:'Your shows')));
+  openTiles('Podcasts',it,sel!=null?sel:it.length>first?first:2);
+}
+
+// a list from the phone: stations, shows or episodes. Kept, so Back from the player returns to it
+let listReq=0;
+function loadList(kind,arg,title,back){
+  openTiles(title,[{label:'‹ Back',icon:'Back',act:()=>back()},{label:'Loading…',icon:'Recents',dim:1}],1,{wait:true,listKind:kind,listArg:String(arg||''),back,req:++listReq});
+  N.audioList(kind,String(arg||''));
+}
+window.i3audio=function(r){
+  if(!menu||!menu.wait||menu.listKind!==r.kind||menu.listArg!==r.arg)return;     // the driver moved on
+  showAnswer(r,menu.title,menu.back);
+};
+function showAnswer(r,title,back,sel){
+  const items=r.items||[],it=[{label:'‹ Back',icon:'Back',act:()=>back()}],again=()=>showAnswer(r,title,back,menu&&menu.sel);
+  if(r.kind==='episodes'){
+    let show={};try{show=JSON.parse(r.arg)}catch(e){}
+    if(items.length&&!show.feed)show.feed=items[0].feed;
+    if(show.feed)it.push({label:follows(show.feed)?'Following '+show.title:'Follow '+show.title,icon:'Heart',note:'adds it to Your shows',act(){follow(show);again()}});
+    if(r.error)it.push({label:r.error,icon:'Recents',dim:1});else if(!items.length)it.push({label:'No episodes found',icon:'Recents',dim:1});
+    items.forEach(e=>it.push({label:e.title,note:e.sub+(e.resume?' · started':''),art:e.art,icon:'Podcast',act(){playItem(e,again)}}));
+    openTiles(title,it,sel!=null?sel:it.length>2?2:1,{rows:true});
+    return;
+  }
+  if(r.error)it.push({label:r.error,icon:'Recents',dim:1});else if(!items.length)it.push({label:'Nothing found',icon:'Recents',dim:1});
+  items.forEach(x=>it.push(x.kind==='podcast'?showTile(x):stationTile(x,undefined,again)));
+  openTiles(title,it,sel!=null?sel:1);
+}
+
+// starts i3D's own player, and shows the now-playing screen straight away
+let nowItem=null,nowAt=0;
+function playItem(x,back){
+  N.audioPlay(JSON.stringify(x));
+  keep(x.kind==='station'?'radio.recent':'pod.recent',x,RECENT_MAX);
+  nowMenu(back,x);
+}
+// whether the now-playing screen is about i3D's own player: the phone says so, or it was asked a moment ago
+const ownNow=()=>{const m=D.media;return !!(m&&m.mine)||(!!nowItem&&Date.now()-nowAt<6000)};
+// what i3D's player has: just asked for, until the phone has caught up; then what the phone reports
+const ownItem=()=>{const m=D.media||{};if(nowItem&&Date.now()-nowAt<6000&&!(m.mine&&m.item&&m.item.id===nowItem.id))return nowItem;return (m.mine&&m.item)||nowItem};
+function nowButtons(){
+  const m=D.media||{},own=ownNow(),it=own?ownItem():null,fresh=own&&!(m.mine&&m.item&&it&&m.item.id===it.id);
+  const on=fresh?true:!!m.playing;
+  const back={label:'Back',icon:'Back',act(){(menu.back||musicMenu)()}};
+  const pp={label:on?'Pause':'Play',icon:on?'Pause':'Play',act(){if(own)N.audioCommand('toggle');else N.media('toggle')}};
+  if(it&&it.kind==='station')return [back,pp,
+    {label:'Stop',icon:'Stop',act(){N.audioStop();nowItem=null;(menu.back||musicMenu)()}},
+    {label:has('radio.favs',it.id)?'Saved':'Save',icon:'Heart',act(){toast(toggle('radio.favs',it)?'Saved to Your stations':'Removed from Your stations');drawMenu()}}];
+  if(it)return [back,{label:'Back 15s',icon:'Back15',act(){N.audioCommand('back')}},pp,{label:'On 30s',icon:'Fwd30',act(){N.audioCommand('fwd')}},
+    {label:follows(it.feed)?'Following':'Follow',icon:'Heart',act(){follow(showOf(it));drawMenu()}},
+    {label:'Episodes',icon:'List',act(){loadList('episodes',JSON.stringify(showOf(it)),it.show||'Episodes',podcastMenu)}}];
+  return [back,{label:'Back 15s',icon:'Back15',act(){N.media('back')}},{label:'Previous',icon:'Prev',act(){N.media('prev')}},pp,
+    {label:'Next',icon:'Next',act(){N.media('next')}},{label:'On 30s',icon:'Fwd30',act(){N.media('fwd')}}];
+}
+function nowMenu(back,item){
+  if(item){nowItem=item;nowAt=Date.now()}
+  $('#toast').hidden=true;
+  const items=nowButtons();
+  menu={title:'Now playing',items,sel:Math.max(0,items.findIndex(b=>b.icon==='Play'||b.icon==='Pause')),kind:'now',back};
+  drawMenu();menuAlive();
+}
+
+/* drawing the music screens */
+const hue=t=>{let h=7;for(const c of String(t))h=(h*31+c.charCodeAt(0))%360;return h};
+function tileHtml(it,i){
+  const h=hue(it.label),g=`--g1:hsl(${h},55%,44%);--g2:hsl(${(h+40)%360},60%,20%)`;
+  const face=it.initial?`<span class="in">${esc(String(it.label).charAt(0).toUpperCase())}</span>`:`<svg viewBox="0 0 24 24">${ICON[it.icon]||ICON.Music}</svg>`;
+  const img=it.art?`<img class="${it.fav?'fv':''}" src="${esc(it.art)}" alt="" onerror="this.remove()">`:'';
+  const prog=it.prog?`<div class="tp"><b style="width:${Math.round(it.prog*100)}%"></b></div>`:'';
+  return `<div class="tile${i===menu.sel?' on':''}${it.dim?' dim':''}"><div class="ta" style="${g}">${face}${img}${prog}</div><div class="tt">${esc(it.label)}</div><div class="ts">${it.note?esc(it.note):'&nbsp;'}</div></div>`;
+}
+function chipHtml(it,i){
+  const h=hue(it.label),g=`--g1:hsl(${h},55%,44%);--g2:hsl(${(h+40)%360},60%,20%)`;
+  const face=it.initial?`<span class="in">${esc(String(it.label).charAt(0).toUpperCase())}</span>`:`<svg viewBox="0 0 24 24">${ICON[it.icon]||ICON.Music}</svg>`;
+  return `<div class="chip${i===menu.sel?' on':''}${it.dim?' dim':''}"><div class="ca" style="${g}">${face}</div><div><div class="tt">${esc(it.label)}</div>${it.note?`<div class="ts">${esc(it.note)}</div>`:''}</div></div>`;
+}
+function miniHtml(i){
+  const m=D.media||{},art=m.mine&&m.item&&m.item.art?m.item.art:artUrl;
+  return `<div class="mini${i===menu.sel?' on':''}">${art?`<img src="${esc(art)}" alt="">`:'<img alt="">'}<div><div class="tt">${esc(m.title||menu.items[i].label)}</div><div class="ts">${esc([m.artist,m.app].filter(Boolean).join(' · ')||'last playing')}</div></div><span class="st">${m.playing?'▶':'❚❚'}</span></div>`;
+}
+function drawMusicScreen(){
+  if(menu.kind==='now'){drawNow();return}
+  const items=menu.items,hint=menu.wait?'loading…':menu.top?'turn to choose · press to open':'turn to choose · press to select';
+  let body;
+  if(menu.rows){
+    body=`<div class="erows">${items.map((it,i)=>`<div class="erow${i===menu.sel?' on':''}${it.dim?' dim':''}">${it.art?`<img src="${esc(it.art)}" alt="">`:`<div class="ea"><svg viewBox="0 0 24 24">${ICON[it.icon]||ICON.Podcast}</svg></div>`}<div><div class="tt">${esc(it.label)}</div>${it.note?`<div class="ts">${esc(it.note)}</div>`:''}</div></div>`).join('')}</div>`;
+  }else{
+    const cell=menu.top?chipHtml:tileHtml;
+    body=`<div class="${menu.top?'chips':'tgrid'}">${items.map((it,i)=>it.mini?'':(it.group?`<div class="glabel">${esc(it.group)}</div>`:'')+cell(it,i)).join('')}</div>`;
+    const mi=items.findIndex(x=>x.mini);
+    if(mi>=0)body+=miniHtml(mi);
+  }
+  H('#msc',`<div class="mh"><span>${esc(menu.title)}</span><small>${hint}</small></div>${body}`);
+  const on=$('#msc .on');if(on)on.scrollIntoView({block:'nearest'});
+}
+function drawNow(){
+  const sel=menu.sel;menu.items=nowButtons();menu.sel=Math.min(sel,menu.items.length-1);
+  const m=D.media||{},own=ownNow(),it=own?ownItem():null,fresh=own&&!(m.mine&&m.item&&it&&m.item.id===it.id);
+  const title=fresh?it.title:(m.title||'Nothing playing');
+  const sub=fresh?(it.kind==='station'?it.sub:it.show):(m.artist||'');
+  const art=own?((it&&it.art)||''):artUrl;
+  const src=own?(it&&it.kind==='station'?'Radio · live':'Podcast'+(it&&it.show?' · '+it.show:'')):(m.app||'Music')+' · '+(m.playing?'playing':'paused');
+  const dur=m.dur||0,pct=dur>0?Math.min(100,(m.pos||0)/dur*100):0;
+  const btns=menu.items.map((b,i)=>`<div class="b${i===menu.sel?' on':''}"><div class="c"><svg viewBox="0 0 24 24">${ICON[b.icon]||ICON.Music}</svg></div><div class="l">${esc(b.label)}</div></div>`).join('');
+  H('#msc',`<div class="mh"><span>Now playing</span><small>turn to choose · press to select</small></div>
+    <div class="now"><div class="nart">${art?`<img src="${esc(art)}" alt="">`:`<svg viewBox="0 0 24 24">${ICON[it&&it.kind==='station'?'Radio':'Music']}</svg>`}</div>
+    <div class="ni"><div class="ns">${esc(src)}</div><div class="nt">${esc(title)}</div><div class="na">${esc(sub)}</div>
+    ${dur>0?`<div class="prog"><b style="width:${pct.toFixed(1)}%"></b></div><div class="times"><span>${mmss(m.pos||0)}</span><span>${mmss(dur)}</span></div>`:''}
+    ${!own&&m.title?`<div class="na" style="font-size:18px;color:var(--muted)">To choose something else in ${esc(m.app||'this app')}, use your phone when parked</div>`:''}
+    <div class="nb">${btns}</div></div></div>`);
+}
+
 function videoMenu(){
   const it=[backTo(PAGES[page]==='Music'?musicMenu:settingsMenu)];
   menuData().videos.forEach(v=>it.push({label:v.title||'YouTube video',act(){
@@ -770,6 +992,8 @@ window.i3heard=function(kind,text,problem){
   if(!h||h.kind!==kind||!menu||!menu.wait)return;       // the driver moved on
   if(problem||!text){closeMenu();toast(problem||'Didn\'t catch that');return}
   if(kind==='place'){waiting('Finding "'+text+'"');N.lookup(text)}
+  else if(kind==='radio')loadList('radiosearch',text,'"'+text+'"',radioMenu);
+  else if(kind==='podcast')loadList('podsearch',text,'"'+text+'"',podcastMenu);
   else if(kind==='name'){
     const want=text.toLowerCase().replace(/^call\s+/,''),all=menuData().everyone,words=want.split(/\s+/);
     let hits=all.filter(c=>c.name.toLowerCase().includes(want));
@@ -814,6 +1038,21 @@ const ICON={
   Journey:'<path d="M4 20h16M5 16l4.5-5.5 3.5 3L19 6M15 6h4v4"/>',
   Alerts:'<path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15zM10 21h4"/>',
   Home:'<path d="M4 11l8-7 8 7M6 10v9h12v-9"/>',
+  Radio:'<rect x="3" y="9" width="18" height="11" rx="2"/><path d="M7 9l10-5"/><circle cx="15.5" cy="14.5" r="2.6"/><path d="M6.5 13h3M6.5 16h3"/>',
+  Podcast:'<circle cx="12" cy="11" r="2.4"/><path d="M8.6 14.6a5 5 0 1 1 6.8 0M6.2 17.2a8.5 8.5 0 1 1 11.6 0M12 13.4V21"/>',
+  Back:'<path d="M15 5l-7 7 7 7"/>',
+  Near:'<path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/>',
+  Chart:'<path d="M5 20V11M10 20V5M15 20v-7M20 20V8"/>',
+  Tag:'<path d="M3.5 12V4h8l9 9-8 8z"/><circle cx="7.5" cy="8" r="1.3"/>',
+  Play:'<path d="M8 5l11 7-11 7z"/>',
+  Pause:'<path d="M8.5 5v14M15.5 5v14"/>',
+  Prev:'<path d="M18 6l-9 6 9 6zM6 6v12"/>',
+  Next:'<path d="M6 6l9 6-9 6zM18 6v12"/>',
+  Back15:'<path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4 4.5v4h4"/><path d="M11 10v5M14 15l1.5-5"/>',
+  Fwd30:'<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3M20 4.5v4h-4"/><path d="M10 10v5M13 15l1.5-5"/>',
+  Heart:'<path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/>',
+  Stop:'<rect x="6.5" y="6.5" width="11" height="11" rx="1.5"/>',
+  List:'<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>',
   Recents:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l4 2"/>',
   Voice:'<path d="M9 11a3 3 0 0 1 6 0v1a3 3 0 0 1-6 0zM6 11a6 6 0 0 0 12 0M12 17v3M9 20h6"/>',
   Keyboard:'<rect x="3" y="7" width="18" height="11" rx="2"/><path d="M6 11h1M10 11h1M14 11h1M18 11h1M6 14.5h12"/>',

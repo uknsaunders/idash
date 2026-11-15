@@ -3,6 +3,15 @@
 Newest first. The app is built automatically and published as `i3-dash.apk` on the
 [`i3dash-latest` release](https://github.com/uknsaunders/idash/releases/tag/i3dash-latest), so the date below is when each change was made.
 
+## 15 November 2026, a new Music screen with radio and podcasts
+
+- **Two groups:** Music now opens full screen. **Choose in the car** has Radio and Podcasts. **Start on your phone when parked** has Spotify, Amazon Music, BBC Sounds and other apps, since they only let approved apps list their music. While moving, that group says to pull over.
+- **Radio:** speak a station, stations near you, UK top, genres, and stations you save. From Radio Browser, a free directory, with no key.
+- **Podcasts:** speak a show, the UK charts, a show's latest episodes, follow a show, and carry on listening. Episodes resume where you left off. From Apple's public podcast charts and search, then each show's own feed, with no key.
+- **i3D plays these itself:** a player on the phone, sound to the car over Bluetooth like any other app. Starting one pauses other music, and choosing a phone app pauses i3D's.
+- **Looks like a streaming app:** artwork tiles, a mini player at the bottom left for what was last playing, and a full now-playing screen with large artwork, a progress bar and buttons on the knob.
+- Tried in the desk simulator only; not yet in the car.
+
 ## 15 November 2026, reconnecting by itself, and a connection log
 
 - **Keeps trying while you're connected to the car:** the connection service used to give up after 20 seconds to 2 minutes without a car link. It now keeps trying for as long as the phone is plugged into the car or paired with it over Bluetooth, and stops only when it isn't.

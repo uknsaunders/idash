@@ -337,6 +337,10 @@ dependencies {
     androidTestImplementation 'com.github.tmurakami:dexopener:2.0.5'
     androidTestImplementation 'org.awaitility:awaitility-scala:3.1.5'
 
+    // i3D: its own player for radio and podcasts chosen in the car
+    implementation 'androidx.media3:media3-exoplayer:1.4.1'
+    implementation 'androidx.media3:media3-exoplayer-hls:1.4.1'
+    implementation 'androidx.media3:media3-session:1.4.1'
     implementation 'io.bimmergestalt.idriveconnectkit:idriveconnectkit:0.8'
     implementation 'io.bimmergestalt:IDriveConnectKitAndroid:0.7'
     testImplementation 'io.bimmergestalt.idriveconnectkit:idriveconnectkit:0.7'

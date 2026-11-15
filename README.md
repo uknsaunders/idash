@@ -15,7 +15,7 @@ This is a personal fork of [AAIdrive](https://github.com/BimmerGestalt/AAIdrive)
 | Page | What it shows |
 |---|---|
 | **Car** | Battery, speed, range, journey figures, tyre rings that colour only when a tyre is low, and the map. |
-| **Music** | Now playing with artwork from Spotify, Amazon Music, Apple Music or BBC Sounds. Choose another app from the car menu (see below). |
+| **Music** | Internet radio and podcasts chosen in the car, with artwork tiles and a full now-playing screen. Spotify, Amazon Music, BBC Sounds and other apps show and play here once started on the phone. |
 | **Chargers** | The nearest charging points, nearest first, with distance and - with a free Open Charge Map key - what's reported available. Press the knob to drive to one. |
 | **Alerts** | Your recent phone notifications, newest first, with a count on the tab. |
 | **Journey** | Miles, cost and efficiency for today, 7 days and 30 days, a 14 day chart and recent trips. |
@@ -76,7 +76,10 @@ A menu with a few options to choose between shows as cards, the same as the home
 - **‹ Home screen** is always one of the choices, so you can always get back to the cards. Journey has nothing to choose, so one press there goes straight home.
 - **Navigate**: a list - saved places, the nearest charger, recent places, or **Type a place** on the car's letter wheel. Picking a result comes straight back to the dash, and the map stays full-screen.
 - **Call**: cards - **Recents** (favourites, missed and recent calls, as a list), **Speak a name**, **All contacts**, or **Type a name**. If someone has more than one number, you pick which (Mobile, Work and so on) before it dials.
-- **Music**: cards - your apps first, so you pick what to play. **Resume** - whatever was last playing, with pause, skip and seek - is a later card, not the first thing offered. Videos you sent from the phone are here too, parked only.
+- **Music**: a full screen in two groups.
+  - **Choose in the car**: **Radio** (speak a station, stations near you, UK top, genres, your saved stations) and **Podcasts** (speak a show, the UK charts, carry on listening, shows you follow). i3D plays these itself on the phone, so the sound reaches the car over Bluetooth like any other app, and other music pauses. Podcasts carry on where you left off. Videos you sent from the phone are here too, parked only.
+  - **Start on your phone when parked**: Spotify, Amazon Music, BBC Sounds and the rest only let apps they approve list their music, so you choose on the phone. While you're moving the group says to pull over instead.
+  - Whatever was last playing is the mini player at the bottom left. It opens **Now playing**: large artwork, the progress bar, and buttons on the knob (pause, back 15 s, on 30 s, next, save a station, follow a show).
 - **Alerts**: a list. **Read alerts aloud** speaks your latest three.
 - **Settings**: a list - display (Automatic, Day or Night), car colour, battery detail, and Video.
 
@@ -102,7 +105,7 @@ Three things the car decides, not the app:
 - **The car's phone screen.** The car shows its own screen when a call connects. i3D brings the dash back once the call is under way, showing the call with **Hang up** one press away.
 - **The globe at the top left.** The car draws its own ConnectedDrive icon and status bar over every app, and an app cannot remove them. The dash keeps its own content clear of them.
 
-What you see in a music app's library depends on the app, and some apps share less than others.
+Radio stations come from [Radio Browser](https://www.radio-browser.info/), a free community directory, and podcasts from Apple's public charts and search, then each show's own feed. Neither needs a key. A station's logo and song details are whatever the station provides, so some are plainer than others.
 
 ## Send a place from your phone
 

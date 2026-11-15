@@ -30,14 +30,17 @@ function tick(){
   const now=performance.now(),dt=Math.max(0,Math.min(2,(now-lastTick)/1000));lastTick=now;
   try{drive(dt)}catch(e){}
   if(sim.music&&sim.playing&&sim.access)sim.posMs=(sim.posMs+dt*1000)%1800000;
+  if(sim.own&&sim.own.playing)sim.own.pos+=dt*1000;
+  const own=sim.own,oi=own&&own.item,ownMedia=own?{title:oi.title,artist:oi.kind==='station'?'Now: The Killers - Mr. Brightside':oi.show,album:'',app:oi.kind==='station'?'Radio':'Podcast',playing:own.playing,
+    pos:oi.kind==='station'?0:own.pos,dur:oi.kind==='station'?0:2700000,mine:true,live:oi.kind==='station',item:oi}:null;
   const t=TRACKS[sim.track],showMusic=sim.music&&sim.access;
   const call=sim.call?Object.assign({},sim.call,sim.access||sim.call.outgoing?{}:{name:''}):null;
   window.i3feed({soc:sim.soc,rangeKm:Math.round(sim.soc*1.52),speedKmh:sim.speedKmh,units:'Miles,CELSIUS',ambientC:12,cabinC:19,batteryC:17,battery12v:92,torqueNm:sim.speedKmh>0?35:0,tariffP:28,odoKm:41230,ocmKey:sim.ocmKey?'demo-key':'',
     lat:sim.lat,lon:sim.lon,heading:sim.heading,mediaPermission:sim.access,
-    media:showMusic?{title:t[0],artist:t[1],album:t[2],app:APPS[sim.app],playing:sim.playing,pos:sim.posMs,dur:1800000}:null,
+    media:ownMedia||(showMusic?{title:t[0],artist:t[1],album:t[2],app:APPS[sim.app],playing:sim.playing,pos:sim.posMs,dur:1800000}:null),
     notes:sim.access?sim.notes:null,call:call,missed:sim.contacts?sim.missed:0,
     event:{title:'Dentist',where:'Gorey Dental Practice, Gorey Village, Jersey',begin:Date.now()+2*3600000}});
-  const wantArt=showMusic?sim.track:-1;if(wantArt!==lastArt){lastArt=wantArt;window.i3art(showMusic?art(t[3]):'')}
+  const wantArt=own?-2:showMusic?sim.track:-1;if(wantArt!==lastArt){lastArt=wantArt;window.i3art(showMusic?art(t[3]):'')}
   ['mapmsg','diag'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none'});
   try{drawMap()}catch(e){}
   post('state',{screen:home?'Home screen':(TITLES[PAGES[page]]||PAGES[page]),list:menu?menu.title:'',day:document.body.classList.contains('daymap'),route:!!route,call:sim.call?(sim.call.ongoing?'on':'ringing'):'',playing:sim.playing&&sim.music,music:sim.music,notes:sim.notes.length});

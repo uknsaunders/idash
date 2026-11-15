@@ -85,11 +85,8 @@ class DashMusic(val context: Context) {
 	/** Why an app showed nothing, as best we can tell */
 	private fun emptyReason(): String {
 		val app = current ?: return "Nothing here"
-		return when {
-			app.packageName.startsWith("com.spotify") -> "Spotify only lists for apps it has approved: needs a Spotify key in the build"
-			!app.connectable -> "${app.name} doesn't let other apps list its music"
-			else -> "${app.name} sent back an empty list"
-		}
+		// these apps only list their music for apps they approve, so the choosing happens on the phone
+		return "Start ${app.name} on your phone when parked, then control it here"
 	}
 
 	private fun label(item: MusicMetadata): String {

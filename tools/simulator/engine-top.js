@@ -43,6 +43,15 @@ window.fetch=async function(u){u=String(u);
   throw new Error('not loaded in the simulator');
 };
 const people=()=>sim.contacts?{contacts:EVERYONE.filter(p=>p.name==='Sarah'||p.name==='Mum'),everyone:EVERYONE,recentCalls:[{name:'Tom',number:'07700 900789',missed:sim.missed>0},{name:'Sarah',number:'+441534555010'},{name:'Garage (Bagot Road)',number:'01534 000111'},{name:'01534 000333',number:'01534 000333'}]}:{contacts:[],everyone:[],recentCalls:[]};
+// radio and podcasts for the in-car music: made-up stations and shows with drawn artwork
+// (the published simulator can't load pictures from the web, so each one is a small SVG)
+const ART=(t,c)=>'data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" fill="${c}"/><circle cx="160" cy="40" r="70" fill="rgba(255,255,255,.12)"/><text x="16" y="178" font-family="Arial" font-weight="700" font-size="34" fill="#fff">${t}</text></svg>`);
+const ST=(id,title,sub,c)=>({kind:'station',id,title,sub,art:ART(title.split(' ').slice(0,2).join(' '),c),url:'https://stream.example/'+id});
+const STATIONS={near:[ST('ch103','Channel 103','Jersey · Pop','#e11d48'),ST('bbcrj','BBC Radio Jersey','News · Talk','#0f172a'),ST('bail','Bailiwick Radio','Jersey · Hits','#0e7490'),ST('isl','Island FM','Guernsey · Pop','#7c3aed')],
+  uk:[ST('r2','BBC Radio 2','Pop · Adult','#ea580c'),ST('r4','BBC Radio 4','Talk · News','#1e3a8a'),ST('cap','Capital FM','Pop · Dance','#be123c'),ST('abs','Absolute 80s','80s · Rock','#9333ea'),ST('cfm','Classic FM','Classical','#0f766e'),ST('lbc','LBC','Talk · News','#334155'),ST('heart','Heart UK','Pop','#dc2626'),ST('r6','BBC 6 Music','Alternative','#16a34a')]};
+const SHOW=(id,title,sub,c)=>({kind:'podcast',id,title,sub,art:ART(title.split(' ').slice(0,2).join(' '),c),feed:'https://feeds.example/'+id});
+const SHOWS=[SHOW('rih','The Rest Is History','Goalhanger','#b45309'),SHOW('arse','Arseblog Arsecast','Arseblog','#c2410c'),SHOW('dic','Desert Island Discs','BBC Radio 4','#0369a1'),SHOW('tnd','The News Agents','Global','#be123c'),SHOW('hgw','How to Fail','Elizabeth Day','#7c3aed'),SHOW('fcb','Football Weekly','The Guardian','#15803d')];
+const EPS=show=>[1,2,3,4,5,6].map(n=>({kind:'episode',id:show.feed+'/'+n,title:['The Great Fire of London','Into the Wild West','Episode '+(500-n),'Live from Jersey','The Big Interview','Q&A special'][n-1],sub:(n+6)+' Nov · '+(30+n*7)+' min',art:show.art,url:show.feed+'/'+n+'.mp3',show:show.title,feed:show.feed}));
 const musicTop=()=>window.i3music({rows:APPS.map((a,i)=>a+(i===sim.app&&sim.music?' (playing)':'')),top:true,played:false});
 window.I3Native={
   log(){},
@@ -55,15 +64,30 @@ window.I3Native={
   answer(){if(sim.call){sim.call.ongoing=true;sim.call.since=Date.now();say('Answered the call')}},
   hangup(){if(sim.call){say(sim.call.ongoing?'Hung up':'Declined the call');sim.call=null}},
   dial(number,name){sim.call={name:name||number,text:'',number:number,outgoing:true,ongoing:true,since:Date.now()};say('Dialled '+(name?name+' on ':'')+number)},
-  media(c){if(!sim.music)return;if(c==='fwd'||c==='back'){sim.posMs=Math.max(0,sim.posMs+(c==='fwd'?30000:-15000));say(c==='fwd'?'Music: forward 30 seconds':'Music: back 15 seconds');return}if(c==='toggle'){sim.playing=!sim.playing;say(sim.playing?'Music: play':'Music: pause')}else{sim.track=(sim.track+(c==='next'?1:TRACKS.length-1))%TRACKS.length;sim.posMs=0;say('Music: '+(c==='next'?'next':'previous')+' track')}},
+  // i3D's own player for radio and podcasts
+  audioList(kind,arg){setTimeout(()=>{
+    let items=[];
+    if(kind==='near')items=STATIONS.near.concat(STATIONS.uk.slice(0,4));
+    else if(kind==='uk')items=STATIONS.uk;
+    else if(kind==='genre')items=STATIONS.uk.filter((x,i)=>i%2===0);
+    else if(kind==='radiosearch')items=STATIONS.near.concat(STATIONS.uk).filter(x=>x.title.toLowerCase().includes(String(arg).toLowerCase().split(' ')[0]));
+    else if(kind==='charts')items=SHOWS;
+    else if(kind==='podsearch')items=SHOWS.filter(x=>x.title.toLowerCase().includes(String(arg).toLowerCase().split(' ').pop()));
+    else if(kind==='episodes'){let s={};try{s=JSON.parse(arg)}catch(e){}const show=SHOWS.find(x=>x.id===s.id||x.feed===s.feed)||SHOWS[0];items=EPS(show);items[1].resume=600000}
+    say('Loaded '+items.length+' '+(kind==='episodes'?'episodes':kind==='charts'||kind==='podsearch'?'podcasts':'stations'));
+    window.i3audio({kind,arg,items})},400)},
+  audioPlay(json){const item=JSON.parse(json);sim.own={item,playing:true,pos:item.kind==='episode'?(item.resume||0):0};sim.music=false;say('i3D is playing '+item.title+(item.kind==='station'?' (radio)':' (podcast)'))},
+  audioStop(){if(sim.own)say('Stopped '+sim.own.item.title);sim.own=null},
+  audioCommand(c){if(!sim.own)return;if(c==='toggle'){sim.own.playing=!sim.own.playing;say(sim.own.playing?'Radio/podcast: play':'Radio/podcast: pause')}else if(c==='fwd'||c==='back'){sim.own.pos=Math.max(0,sim.own.pos+(c==='fwd'?30000:-15000));say(c==='fwd'?'Forward 30 seconds':'Back 15 seconds')}},
+  media(c){if(sim.own){this.audioCommand(c);return}if(!sim.music)return;if(c==='fwd'||c==='back'){sim.posMs=Math.max(0,sim.posMs+(c==='fwd'?30000:-15000));say(c==='fwd'?'Music: forward 30 seconds':'Music: back 15 seconds');return}if(c==='toggle'){sim.playing=!sim.playing;say(sim.playing?'Music: play':'Music: pause')}else{sim.track=(sim.track+(c==='next'?1:TRACKS.length-1))%TRACKS.length;sim.posMs=0;say('Music: '+(c==='next'?'next':'previous')+' track')}},
   // voice: the simulator "hears" a set phrase after a moment
-  listen(kind){say('Listening through the phone\'s microphone ('+kind+')');const heard={place:'cheeky monkies nursery',name:'Sarah',reply:'Running ten minutes late'}[kind]||'';
+  listen(kind){say('Listening through the phone\'s microphone ('+kind+')');const heard={place:'cheeky monkies nursery',name:'Sarah',reply:'Running ten minutes late',radio:'Channel 103',podcast:'the rest is history'}[kind]||'';
     setTimeout(()=>{say('Heard: "'+heard+'"');window.i3heard(kind,heard,null)},1500)},
   lookup(text){say('Looked up "'+text+'"');setTimeout(()=>window.i3found({error:null,items:[{name:/cheeky/i.test(text)?'Cheeky Monkeys Nursery':text.split(',')[0],detail:'La Rue de la Croix, Grouville',lat:49.1802,lon:-2.0489},{name:'Cheeky Monkeys Day Nursery',detail:'St Saviour',lat:49.1935,lon:-2.0841}]}),700)},
   reply(key,text){const n=sim.notes.find(x=>x.key===key);if(!n)return false;say('Replied to '+n.title+': "'+text+'"');sim.notes=sim.notes.filter(x=>x.key!==key);return true},
   clearNote(key){sim.notes=sim.notes.filter(x=>x.key!==key);say('Cleared an alert from the phone')},
   musicOpen(){sim.level=0;setTimeout(musicTop,350)},
-  musicPick(i){setTimeout(()=>{
+  musicPick(i){if(sim.level===0&&sim.own){sim.own.playing=false}setTimeout(()=>{
     if(sim.level===0){sim.level=1;sim.pickApp=i;window.i3music({rows:['‹ Back'].concat(LISTS),top:false,played:false})}
     else if(i===0){sim.level=0;musicTop()}
     else{sim.app=sim.pickApp;sim.music=true;sim.playing=true;sim.track=i%TRACKS.length;sim.posMs=0;say('Playing "'+LISTS[i-1]+'" on '+APPS[sim.app]);window.i3music({rows:[],top:false,played:true})}},350)},
