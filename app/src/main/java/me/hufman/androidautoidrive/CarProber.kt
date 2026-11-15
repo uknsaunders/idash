@@ -57,7 +57,7 @@ class CarProber(val securityAccess: SecurityAccess, val settings: AppSettings, v
 		if (!pingCar()) {
 			// car has disconnected
 			Log.i(TAG, "Previously-connected car has disconnected")
-			ConnectionLog.dropped("The car stopped answering - looking for it again")
+			ConnectionLog.problem("The car stopped answering - looking for it again")
 			IDriveConnectionStatus.reset()
 			schedule(5000)
 		}

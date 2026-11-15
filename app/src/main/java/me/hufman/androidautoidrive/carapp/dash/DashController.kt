@@ -80,6 +80,11 @@ class DashController(val context: Context,
 		const val CALL_RETURN_WINDOW_MS = 8000L
 		const val CALL_WATCH_INTERVAL_MS = 1500L
 		const val CALL_WATCH_MAX_MS = 90000L
+		// reversing: the car's camera / parking screen takes over; bring the dash back once out of reverse
+		const val GEAR_REVERSE = 2
+		const val REVERSE_RETURN_WINDOW_MS = 3000L      // the reverse gear has to come with the screen change
+		const val REVERSE_SETTLE_MS = 2500L             // out of reverse this long before coming back
+		const val REVERSE_WATCH_MAX_MS = 10 * 60 * 1000L
 		/** how long a call placed from the dashboard is shown before the phone itself reports it */
 		const val DIAL_GRACE_MS = 6000L
 
@@ -161,6 +166,11 @@ class DashController(val context: Context,
 		}
 		watch(CDS.ENGINE.RPMSPEED, "rpm", false) {
 			it.tryAsJsonPrimitive("RPMSpeed")?.tryAsInt
+		}
+		watch(CDS.DRIVING.GEAR, "gear", false) {
+			val g = it.tryAsJsonPrimitive("gear")?.tryAsInt
+			if (g != null) gear = g
+			g
 		}
 		watchTyres()
 		watch(CDS.VEHICLE.UNITS, "units", true) {
@@ -292,6 +302,10 @@ class DashController(val context: Context,
 			pausedAt = SystemClock.uptimeMillis()
 			handler.removeCallbacks(callWatch)
 			handler.postDelayed(callWatch, 700)
+			sawReverse = false
+			outOfReverseSince = 0L
+			handler.removeCallbacks(reverseWatch)
+			handler.postDelayed(reverseWatch, 300)
 			pushing = false
 			handler.removeCallbacks(pushRunnable)
 			handler.removeCallbacks(mediaRunnable)
@@ -348,6 +362,38 @@ class DashController(val context: Context,
 	@Volatile private var pausedAt = 0L
 	private var returnedForCall = false
 	private var sawCallAfterPause = false
+	/**
+	 * i3D: when the reversing camera or parking screen takes the screen, the car hides the dash (and the
+	 * pictures stop being sent, so the camera gets the car's full attention). Afterwards the car doesn't
+	 * always come back to the dash, so once the car has been out of reverse for a moment, bring it back.
+	 * Only when the reverse gear came with the screen change, so leaving the dash for a menu isn't undone.
+	 */
+	@Volatile private var gear = 0
+	private var sawReverse = false
+	private var outOfReverseSince = 0L
+	private val reverseWatch = object: Runnable {
+		override fun run() {
+			if (pushing) { sawReverse = false; return }     // the dashboard is back on screen
+			val now = SystemClock.uptimeMillis()
+			val sincePause = now - pausedAt
+			if (gear == GEAR_REVERSE) {
+				if (sincePause <= REVERSE_RETURN_WINDOW_MS) sawReverse = true
+				outOfReverseSince = 0L
+			} else if (sawReverse) {
+				if (outOfReverseSince == 0L) outOfReverseSince = now
+				if (now - outOfReverseSince >= REVERSE_SETTLE_MS) {
+					sawReverse = false
+					Log.i(TAG, "Out of reverse, bringing the dashboard back")
+					background { carUi?.openDash() }
+					return
+				}
+			} else if (sincePause > REVERSE_RETURN_WINDOW_MS) {
+				return      // the driver left the dash for something else
+			}
+			if (sincePause < REVERSE_WATCH_MAX_MS) handler.postDelayed(this, 500L)
+		}
+	}
+
 	private val callWatch = object: Runnable {
 		override fun run() {
 			if (pushing) return     // the dashboard is back on screen

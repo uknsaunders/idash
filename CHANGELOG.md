@@ -3,6 +3,14 @@
 Newest first. The app is built automatically and published as `i3-dash.apk` on the
 [`i3dash-latest` release](https://github.com/uknsaunders/idash/releases/tag/i3dash-latest), so the date below is when each change was made.
 
+## 15 November 2026, connection tips and coming back after reversing
+
+Ideas borrowed from the NBT-AAD Android Auto project, without its changes to the car.
+- **Tap-through tip:** when the car link is ready but the car hasn't connected after 10 seconds, the connection card now suggests opening the car's list of mobile devices, choosing your phone, and tapping Phone, Bluetooth audio and Apps in turn. That makes the car open its link to the phone again.
+- **A link that keeps dropping:** three connections in a row that drop within 20 seconds now show a message on the phone saying to re-pair or tap through, instead of retrying quietly.
+- **Back after reversing:** when the reversing camera or parking screen takes over, the dash pauses sending pictures. If the car doesn't return to the dash by itself, i3D brings it back 2.5 seconds after you come out of reverse. It only does this when reverse came with the screen change, so leaving the dash for another menu isn't undone.
+- Not yet tried in the car.
+
 ## 15 November 2026, a new Music screen with radio and podcasts
 
 - **Two groups:** Music now opens full screen. **Choose in the car** has Radio and Podcasts. **Start on your phone when parked** has Spotify, Amazon Music, BBC Sounds and other apps, since they only let approved apps list their music. While moving, that group says to pull over.

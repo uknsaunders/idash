@@ -142,16 +142,13 @@ class ConnectionStatusModel(val connection: CarConnectionDebugging, val carInfo:
 			_bclReadyTimer = viewModelScope.launch {
 				delay(BCL_READY_THRESHOLD)
 				if (_isBclConnected.value != true) {
-					if (connection.isBMWMineInstalled && connection.btCarBrand == "BMW") {
-						_hintBclDisconnected.value = { getString(R.string.txt_setup_enable_bmwmine) }
-						_carConnectionHint.value = { getString(R.string.txt_setup_enable_bmwmine) }
-					} else if (connection.isMiniMineInstalled && connection.btCarBrand == "MINI") {
-						_hintBclDisconnected.value = { getString(R.string.txt_setup_enable_minimine) }
-						_carConnectionHint.value = { getString(R.string.txt_setup_enable_minimine) }
-					} else {
-						_hintBclDisconnected.value = { getString(R.string.txt_setup_enable_bclspp_usb) }
-						_carConnectionHint.value = { getString(R.string.txt_setup_enable_bclspp_usb) }
-					}
+					// i3D: each hint ends with the tap-through trick, which makes the car reopen its link to the phone
+					val first = if (connection.isBMWMineInstalled && connection.btCarBrand == "BMW") R.string.txt_setup_enable_bmwmine
+						else if (connection.isMiniMineInstalled && connection.btCarBrand == "MINI") R.string.txt_setup_enable_minimine
+						else R.string.txt_setup_enable_bclspp_usb
+					val hint: Context.() -> String = { getString(first) + "\n" + getString(R.string.txt_setup_tapthrough) }
+					_hintBclDisconnected.value = hint
+					_carConnectionHint.value = hint
 				}
 			}
 		}

@@ -264,6 +264,7 @@
     <string name="txt_setup_enable_bclspp_bt">Try toggling Bluetooth Music</string>
     <string name="txt_setup_enable_bclspp_usb">Try toggling Bluetooth Music or connecting over USB</string>
     <string name="txt_setup_enable_bmwmine">Make sure the MyBMW app is logged in</string>
+    <string name="txt_setup_tapthrough">Still nothing? In the car\'s list of mobile devices, choose your phone, then tap Phone, Bluetooth audio and Apps in turn. That makes the car open its link to the phone again.</string>
     <string name="txt_setup_enable_minimine">Make sure the MINI app is logged in</string>
     <string name="txt_setup_bcl_connecting">Apps Connection is connecting</string>
     <string name="txt_setup_bcl_connected">Apps Connection is running</string>

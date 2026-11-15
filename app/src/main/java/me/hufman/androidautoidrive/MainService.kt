@@ -411,7 +411,7 @@ class MainService: Service() {
 		if (state == loggedState) return
 		loggedState = state
 		when (state) {
-			"connected" -> ConnectionLog.event(message)
+			"connected" -> ConnectionLog.connected(message)
 			"dropped" -> ConnectionLog.dropped(message)
 			"waiting" -> ConnectionLog.event(message)
 			else -> ConnectionLog.problem(message)

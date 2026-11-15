@@ -67,10 +67,29 @@ object ConnectionLog {
 		add("i3D is on the car screen", false)
 	}
 
-	/** The car link went away */
+	/** The car connected: the start of a session, to tell a short one from a long one */
+	@Volatile private var connectedTime: Long = 0
+	@Volatile private var shortDrops = 0
+	private const val SHORT_SESSION = 20000L
+	private const val SHORT_DROPS = 3
+	const val KEEPS_DROPPING = "The car link keeps dropping soon after connecting. Re-pair the phone with the car, or in the car's list of mobile devices choose your phone and tap Phone, Bluetooth audio and Apps in turn."
+	fun connected(message: String) {
+		connectedTime = System.currentTimeMillis()
+		add(message, false)
+	}
+
+	/** The car link went away. Three short sessions in a row means retrying alone won't fix it */
 	fun dropped(message: String) {
-		droppedTime = System.currentTimeMillis()
+		val now = System.currentTimeMillis()
+		droppedTime = now
+		shortDrops = if (connectedTime > 0 && now - connectedTime < SHORT_SESSION) shortDrops + 1 else 0
+		connectedTime = 0
 		add(message, true)
+		if (shortDrops >= SHORT_DROPS) {
+			shortDrops = 0
+			synchronized(this) { lastWritten.remove(KEEPS_DROPPING) }     // say it again each time it happens
+			add(KEEPS_DROPPING, true)
+		}
 	}
 
 	private fun add(message: String, problem: Boolean) {
