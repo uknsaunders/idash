@@ -59,6 +59,9 @@ object ConnectionLog {
 	/** Something that went wrong, shown on the phone until the car connects again */
 	fun problem(message: String) = add(message, true)
 
+	/** A car app stopped by itself: written every time, since each one is part of the story */
+	fun stopped(message: String) = add(message, true, always = true)
+
 	/** i3D's own screen was created in the car */
 	fun appShown() {
 		appShownTime = System.currentTimeMillis()
@@ -75,7 +78,7 @@ object ConnectionLog {
 	const val KEEPS_DROPPING = "The car link keeps dropping soon after connecting. Re-pair the phone with the car, or in the car's list of mobile devices choose your phone and tap Phone, Bluetooth audio and Apps in turn."
 	fun connected(message: String) {
 		connectedTime = System.currentTimeMillis()
-		add(message, false)
+		add(message, false, always = true)
 	}
 
 	/** The car link went away. Three short sessions in a row means retrying alone won't fix it */
@@ -84,7 +87,7 @@ object ConnectionLog {
 		droppedTime = now
 		shortDrops = if (connectedTime > 0 && now - connectedTime < SHORT_SESSION) shortDrops + 1 else 0
 		connectedTime = 0
-		add(message, true)
+		add(message, true, always = true)
 		if (shortDrops >= SHORT_DROPS) {
 			shortDrops = 0
 			synchronized(this) { lastWritten.remove(KEEPS_DROPPING) }     // say it again each time it happens
@@ -92,7 +95,8 @@ object ConnectionLog {
 		}
 	}
 
-	private fun add(message: String, problem: Boolean) {
+	/** always: a change of state, written every time (only the retries in between are thinned out) */
+	private fun add(message: String, problem: Boolean, always: Boolean = false) {
 		val changed = synchronized(this) {
 			if (problem) {
 				lastProblem = message
@@ -100,7 +104,7 @@ object ConnectionLog {
 			}
 			val now = System.currentTimeMillis()
 			val previous = lastWritten[message]
-			if (previous != null && now - previous < REPEAT_WINDOW) return@synchronized false     // the same retry again
+			if (!always && previous != null && now - previous < REPEAT_WINDOW) return@synchronized false     // the same retry again
 			lastWritten[message] = now
 			if (lastWritten.size > 200) lastWritten.clear()
 			val line = timeFormat.format(Date()) + (if (problem) "  ! " else "    ") + message

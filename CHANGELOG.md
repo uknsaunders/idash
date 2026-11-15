@@ -3,6 +3,11 @@
 Newest first. The app is built automatically and published as `i3-dash.apk` on the
 [`i3dash-latest` release](https://github.com/uknsaunders/idash/releases/tag/i3dash-latest), so the date below is when each change was made.
 
+## 15 November 2026, a clearer connection log
+
+- **How the phone is attached:** "Connected" and "Waiting" lines now say whether the phone is on USB, Bluetooth only, or neither.
+- **Every connect and drop is written:** the log used to write a repeated line only once every 10 minutes, which hid each cycle of a link that kept dropping. Connects, drops and stopped car apps are now written every time. Only the retries in between are still thinned out.
+
 ## 15 November 2026, public toilets
 
 - **Public toilets in Navigate:** the ten nearest public toilets within 5 miles, nearest first, with free/pay, accessible, baby change and 24-hour where known. Press one to drive there. From OpenStreetMap, no key needed; customers-only and private ones are left out.

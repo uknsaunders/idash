@@ -347,7 +347,7 @@ class MainService: Service() {
 				AppSettings.loadSettings(applicationContext)
 				handler.removeCallbacks(securityRetry)
 				shutdownDeferredOnce = false
-				logState("connected", "Connected to the car (${iDriveConnectionReceiver.brand ?: "unknown brand"})")
+				logState("connected", "Connected to the car (${iDriveConnectionReceiver.brand ?: "unknown brand"}) ${linkKind()}")
 
 				// set the car app languages
 				val locale = if (appSettings[AppSettings.KEYS.FORCE_CAR_LANGUAGE].isNotBlank()) {
@@ -388,7 +388,7 @@ class MainService: Service() {
 				} else if (loggedState == "connected") {
 					logState("dropped", "The car link dropped - reconnecting")
 				} else {
-					logState("waiting", "Waiting for the car link from MyBMW")
+					logState("waiting", "Waiting for the car link from MyBMW ${linkKind()}")
 				}
 				if (connectionTime != null) {
 					// record that we successfully disconnected
@@ -405,6 +405,14 @@ class MainService: Service() {
 			carInformationUpdater.connectionBrand = iDriveConnectionReceiver.brand
 			carInformationUpdater.isConnected = iDriveConnectionReceiver.isConnected && securityAccess.isConnected()
 		}
+	}
+
+	/** i3D: how the phone is attached to the car, for the connection log */
+	private fun linkKind(): String = when {
+		usbStatus.isUsbAccessoryConnected && btStatus.isBTConnected -> "over USB (Bluetooth also connected)"
+		usbStatus.isUsbAccessoryConnected -> "over USB"
+		btStatus.isBTConnected -> "over Bluetooth only (no USB)"
+		else -> "(phone not attached to the car by USB or Bluetooth)"
 	}
 
 	private fun logState(state: String, message: String) {

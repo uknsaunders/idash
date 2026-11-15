@@ -37,7 +37,7 @@ class CarThread(name: String, var runnable: () -> (Unit)): Thread(name) {
 		} finally {
 			if (!quitRequested) {
 				val reason = endReason ?: "it finished unexpectedly"
-				ConnectionLog.problem("$name stopped: $reason")
+				ConnectionLog.stopped("$name stopped: $reason")
 				try { onUnexpectedEnd?.invoke(reason) } catch (e: Exception) { Log.w(TAG, "Problem while restarting $name", e) }
 			}
 		}
