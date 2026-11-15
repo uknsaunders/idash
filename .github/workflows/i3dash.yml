@@ -4,7 +4,7 @@ name: i3 Dash
 # and publishes it on the "latest" release page for downloading on the phone.
 on:
   push:
-    branches: [main]
+    branches: [test-13nov]
   workflow_dispatch:
 
 permissions:
@@ -61,11 +61,12 @@ jobs:
       - name: Publish to the latest release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: i3dash-latest
-          name: i3 Dash (latest build)
+          tag_name: i3dash-13nov-test
+          name: "i3 Dash test: the 13 November build"
           prerelease: true
           make_latest: false
           body: |
-            Latest i3 Dash build from commit ${{ github.sha }}.
-            Download **i3-dash.apk** on your phone and open it to install.
+            The i3 Dash build from 13 November (commit e94083fc), before the changes of 13-15 November.
+            For checking whether the car connects with this older version. Android won't install an older
+            version over a newer one, so uninstall i3D first; the API keys will need entering again.
           files: dist/i3-dash.apk
