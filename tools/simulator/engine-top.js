@@ -29,6 +29,11 @@ window.fetch=async function(u){u=String(u);
       {distance:d2,name:'La Grande Route de Faldouet',maneuver:{type:'turn',modifier:north===east?'right':'left'}},
       {distance:0,name:'',maneuver:{type:'arrive'}}]}]}]})}
   if(u.includes('open-meteo'))return ok({current:{weather_code:2,is_day:1}});
+  if(u.includes('overpass')&&decodeURIComponent(u).includes('toilets'))return ok({elements:[
+    {type:'node',lat:sim.lat+0.009,lon:sim.lon+0.012,tags:{amenity:'toilets',name:'Gorey Pier toilets',fee:'no',wheelchair:'yes',changing_table:'yes'}},
+    {type:'way',center:{lat:sim.lat-0.006,lon:sim.lon-0.004},tags:{amenity:'toilets','addr:street':'La Rue a Don',fee:'no',opening_hours:'24/7'}},
+    {type:'node',lat:sim.lat+0.002,lon:sim.lon-0.03,tags:{amenity:'toilets',access:'customers',name:'Cafe (customers only)'}},
+    {type:'node',lat:sim.lat-0.02,lon:sim.lon-0.05,tags:{amenity:'toilets',name:'Green Island',wheelchair:'yes'}}]});
   if(u.includes('overpass')){const q=decodeURIComponent(u);return ok({elements:q.includes('charging')?[{lat:sim.lat+0.012,lon:sim.lon+0.01,tags:{name:'Gorey Pier',capacity:'2'}},{lat:sim.lat-0.004,lon:sim.lon-0.006,tags:{name:'Grouville Parish Hall',capacity:'1'}},{lat:sim.lat+0.003,lon:sim.lon-0.07,tags:{operator:'Evolve',capacity:'6'}},{lat:sim.lat-0.01,lon:sim.lon-0.03,tags:{name:'Longueville Waitrose',capacity:'4'}},{lat:sim.lat+0.02,lon:sim.lon-0.09,tags:{name:'Sand Street car park',capacity:'8'}},{lat:sim.lat+0.04,lon:sim.lon-0.1,tags:{}}]:[]})}
   if(u.includes('openchargemap')){
     const poi=(title,lat,lon,points,kw,statuses)=>({AddressInfo:{Title:title,Latitude:lat,Longitude:lon},NumberOfPoints:points,

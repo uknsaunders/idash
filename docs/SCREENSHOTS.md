@@ -32,6 +32,10 @@ Favourites, missed and recent calls together - a list, opened from the Recents c
 Shown when a contact has more than one.
 ![Number list](screenshots/menu-call-numbers.png)
 
+### Public toilets
+From Navigate: the nearest public toilets from OpenStreetMap, with free, accessible and baby change where known.
+![Public toilets](screenshots/menu-toilets.png)
+
 ### Music
 Two groups. **Choose in the car**: Radio and Podcasts, played by i3D itself. **Start on your phone when parked**: Spotify, Amazon Music, BBC Sounds and the rest, which only let approved apps list their music. What was last playing is the mini player at the bottom left.
 ![Music](screenshots/music-top.png)

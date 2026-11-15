@@ -571,6 +571,35 @@ function chargersMenu(){
   it.push({label:'Close menu',act:closeMenu});
   openMenu('Chargers',it,first);
 }
+/* public toilets, from OpenStreetMap (free, no key). Fetched when asked for, kept for 10 minutes or 1 km */
+let loos=null,loosAt=null,loosTime=0;
+async function fetchToilets(){
+  const q='[out:json][timeout:15];nwr["amenity"="toilets"](around:8000,'+pos[1].toFixed(4)+','+pos[0].toFixed(4)+');out center 80;';
+  const j=await (await fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q))).json();
+  return (j.elements||[]).map(e=>{const t=e.tags||{},lat=e.lat!=null?e.lat:e.center&&e.center.lat,lon=e.lon!=null?e.lon:e.center&&e.center.lon;
+    if(lat==null||['private','no','customers'].includes(t.access))return null;
+    const bits=[];
+    if(t.fee==='no')bits.push('free');else if(t.fee==='yes')bits.push('pay');
+    if(t.wheelchair==='yes')bits.push('accessible');
+    if(t.changing_table==='yes'||t.diaper==='yes')bits.push('baby change');
+    if(t.opening_hours==='24/7')bits.push('24 h');
+    return {lat,lon,name:t.name||(t['addr:street']?'Toilets, '+t['addr:street']:'Public toilets'),info:bits.join(' · ')}}).filter(Boolean);
+}
+async function toiletsMenu(){
+  if(!pos){closeMenu();toast('Waiting for the car\'s position');return}
+  if(!loos||!loosAt||hav(pos,loosAt)>1000||Date.now()-loosTime>600000){
+    waiting('Public toilets');
+    try{loos=await fetchToilets();loosAt=pos;loosTime=Date.now()}
+    catch(e){log('toilets: '+e.message);if(menu&&menu.wait){closeMenu();toast('Couldn\'t look up toilets - is the phone online?')}return}
+    if(!menu||!menu.wait)return;       // the driver moved on while it was loading
+  }
+  const it=[backTo(navMenu)];
+  loos.map(c=>({c,d:hav(pos,[c.lon,c.lat])})).sort((a,b)=>a.d-b.d).slice(0,10)
+    .forEach(n=>it.push({label:n.c.name,note:fmtD(n.d*1.25)+(n.c.info?' · '+n.c.info:''),act(){goTo({lat:n.c.lat,lon:n.c.lon,name:n.c.name})}}));
+  if(it.length===1)it.push({label:'No public toilets mapped within 5 miles',dim:1});
+  it.push({label:'From OpenStreetMap',note:'opening times may vary',dim:1});
+  openMenu('Public toilets',it,1);
+}
 function nearestCharger(){
   if(!pos||!chargers.length)return null;
   let best=null,bd=1e12;
@@ -710,6 +739,7 @@ function navMenu(){
   if(ev&&ev.where)it.push({label:ev.title,note:new Date(ev.begin).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),act(){waiting('Finding '+ev.where.split(',')[0]);N.lookup(ev.where)}});
   const ch=nearestCharger();
   if(ch)it.push({label:'Nearest charger',note:fmtD(ch.d*1.25),act(){goTo({lat:ch.c.lat,lon:ch.c.lon,name:ch.c.name||'Charger'})}});
+  it.push({label:'Public toilets',note:'nearby',act:toiletsMenu});
   const saved=new Set(d.places.map(p=>String(p.name).toLowerCase()));
   d.recents.filter(p=>!saved.has(String(p.name).toLowerCase())).forEach(p=>it.push({label:p.name,note:'recent',act(){goTo(p)}}));
   it.push({label:'Type a place…',note:'letter wheel',act(){closeMenu();N.search()}});

@@ -3,6 +3,10 @@
 Newest first. The app is built automatically and published as `i3-dash.apk` on the
 [`i3dash-latest` release](https://github.com/uknsaunders/idash/releases/tag/i3dash-latest), so the date below is when each change was made.
 
+## 15 November 2026, public toilets
+
+- **Public toilets in Navigate:** the ten nearest public toilets within 5 miles, nearest first, with free/pay, accessible, baby change and 24-hour where known. Press one to drive there. From OpenStreetMap, no key needed; customers-only and private ones are left out.
+
 ## 15 November 2026, connection tips and coming back after reversing
 
 Ideas borrowed from the NBT-AAD Android Auto project, without its changes to the car.
