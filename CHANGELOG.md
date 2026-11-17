@@ -3,6 +3,12 @@
 Newest first. The app is built automatically and published as `i3-dash.apk` on the
 [`i3dash-latest` release](https://github.com/uknsaunders/idash/releases/tag/i3dash-latest), so the date below is when each change was made.
 
+## 17 November 2026, a second way to read the car's details
+
+- **Fallback sign-in:** the first thing the app does after connecting is read the car's details. It signs in for that as MyBMW's own component (cdsbaseapp). If the car stops answering, it now tries again as the certificate the connection check has just used successfully, and remembers whichever works.
+- **Where it stops:** the connection log now says which step the car stopped answering at (sending the certificate, MyBMW signing the challenge, logging in, or asking for the car's details).
+- Not yet tried in the car.
+
 ## 17 November 2026, no AAIdrive welcome pages
 
 - **Straight to i3D's home screen:** after a fresh install, the phone app no longer shows AAIdrive's original welcome pages, which looked like the old app. i3D's home screen has its own setup checklist.

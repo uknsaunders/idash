@@ -15,20 +15,35 @@ class CarInformationDiscovery(iDriveConnectionStatus: IDriveConnectionStatus, se
 	val carappListener: CarAppListener
 	val carConnection: BMWRemotingServer
 	var capabilities: Map<String, String?>? = null
+	/** i3D: how far it got, for the connection log */
+	var step = "connecting"
+		private set
 
 	init {
 		carappListener = CarAppListener(listener)
 		carConnection = IDriveConnection.getEtchConnection(iDriveConnectionStatus.host
 				?: "127.0.0.1", iDriveConnectionStatus.port ?: 8003, carappListener)
-		val appCert = carAppAssets.getAppCertificate(iDriveConnectionStatus.brand
-				?: "")?.readBytes() as ByteArray
-		val sas_challenge = carConnection.sas_certificate(appCert)
-		val sas_login = securityAccess.signChallenge(challenge = sas_challenge)
-		carConnection.sas_login(sas_login)
+		// i3D: each step goes in the connection log, so a car that stops answering shows where
+		try {
+			val appCert = carAppAssets.getAppCertificate(iDriveConnectionStatus.brand
+					?: "")?.readBytes() as ByteArray
+			step = "sending the certificate"
+			val sas_challenge = carConnection.sas_certificate(appCert)
+			step = "signing the car's challenge with MyBMW"
+			val sas_login = securityAccess.signChallenge(challenge = sas_challenge)
+			step = "logging in"
+			carConnection.sas_login(sas_login)
+			step = "logged in"
+		} catch (e: Exception) {
+			try { IDriveConnection.disconnectEtchConnection(carConnection) } catch (e2: Exception) {}
+			throw DiscoveryStepException(step, e)
+		}
 	}
 
 	fun onCreate() {
+		step = "asking for the car's details"
 		getCapabilities()
+		step = "read the car's details"
 		listener.onCdsConnection(CDSConnectionEtch(carConnection))
 	}
 
@@ -71,6 +86,9 @@ class CarInformationDiscovery(iDriveConnectionStatus: IDriveConnectionStatus, se
 		listener.onCdsConnection(null)
 	}
 }
+
+/** i3D: which step the car stopped answering at */
+class DiscoveryStepException(val step: String, cause: Exception): Exception("while $step: ${cause.javaClass.simpleName} ${cause.message ?: ""}".trim(), cause)
 
 interface CarInformationDiscoveryListener: CDSEventHandler {
 	fun onCapabilities(capabilities: Map<String, String?>)
