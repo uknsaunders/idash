@@ -55,6 +55,7 @@ object DashAudioSources {
 		}
 	} catch (e: Exception) {
 		Log.w(TAG, "Couldn't load $kind", e)
+		me.hufman.androidautoidrive.ConnectionLog.problem("Music: couldn't load $kind ($arg): ${e.javaClass.simpleName} ${e.message ?: ""}".take(200))
 		Answer(JSONArray(), "Couldn't load that list: ${e.javaClass.simpleName} ${e.message ?: ""}".trim().take(110))
 	}
 
@@ -116,11 +117,13 @@ object DashAudioSources {
 
 	private fun radioGet(path: String): String {
 		var last: Exception? = null
+		val tried = ArrayList<String>()
 		for (server in radioServerList()) {
+			tried.add(server.removePrefix("https://"))
 			try { return get(server + path) } catch (e: Exception) { last = e; Log.w(TAG, "$server didn't answer: $e") }
 		}
 		radioServers = null
-		throw last ?: Exception("No radio directory answered")
+		throw Exception("No radio directory answered (tried ${tried.joinToString()}): ${last?.javaClass?.simpleName} ${last?.message ?: ""}")
 	}
 
 	/* ---------- podcasts ---------- */

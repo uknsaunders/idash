@@ -17,7 +17,7 @@ const hav=(a,b)=>{const R=6371000,r=Math.PI/180,dLat=(b[1]-a[1])*r,dLon=(b[0]-a[
 window.__simHav=hav;
 // the internet, as far as the car page is concerned: a made-up route, weather and one charger. Map pictures are not loaded.
 window.fetch=async function(u){u=String(u);
-  const ok=j=>({ok:true,status:200,json:async()=>j});
+  const ok=j=>({ok:true,status:200,json:async()=>j,text:async()=>JSON.stringify(j)});
   if(u.includes('router.project-osrm.org')){
     const m=u.match(/driving\/([-\d.]+),([-\d.]+);([-\d.]+),([-\d.]+)/),a=[+m[1],+m[2]],b=[+m[3],+m[4]],corner=[a[0],b[1]],coords=[];
     for(let i=0;i<=10;i++)coords.push([a[0],a[1]+(corner[1]-a[1])*i/10]);

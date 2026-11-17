@@ -1053,6 +1053,8 @@ class DashController(val context: Context,
 		@JavascriptInterface
 		fun log(message: String) {
 			Log.i(TAG, "page: $message")
+			// i3D: lookups that failed on the car screen go in the connection log too, so they can be sent
+			me.hufman.androidautoidrive.ConnectionLog.event("Car screen: ${message.take(160)}")
 		}
 
 		/* ---- the dashboard's own menu ---- */
