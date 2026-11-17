@@ -546,7 +546,7 @@ async function fetchChargers(){
       }catch(e){log('open charge map: '+e.message);chargers=await fetchOsmChargers();chgLive=false;chgSrc='Open Charge Map failed ('+e.message+') - locations only'}
     }else{chargers=await fetchOsmChargers();chgLive=false;chgSrc='locations only - add an Open Charge Map key for status'}
     chgAt=pos;drawChargers();
-  }catch(e){log('chargers: '+e.message)}
+  }catch(e){log('chargers: '+e.message);chgSrc='Couldn\'t look up chargers ('+e.message+')'}
   chgBusy=false;
 }
 function drawChargers(){
@@ -590,7 +590,7 @@ async function toiletsMenu(){
   if(!loos||!loosAt||hav(pos,loosAt)>1000||Date.now()-loosTime>600000){
     waiting('Public toilets');
     try{loos=await fetchToilets();loosAt=pos;loosTime=Date.now()}
-    catch(e){log('toilets: '+e.message);if(menu&&menu.wait){closeMenu();toast('Couldn\'t look up toilets - is the phone online?')}return}
+    catch(e){log('toilets: '+e.message);if(menu&&menu.wait){closeMenu();toast('Couldn\'t look up toilets ('+e.message+')')}return}
     if(!menu||!menu.wait)return;       // the driver moved on while it was loading
   }
   const it=[backTo(navMenu)];

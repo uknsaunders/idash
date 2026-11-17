@@ -22,9 +22,21 @@ import java.util.*
 object DashAudioSources {
 	private const val TAG = "i3DAudioSources"
 	private const val AGENT = "i3D/1.0 (BMW i3 dashboard; github.com/uknsaunders/idash)"
-	// Radio Browser asks apps to use any of its mirrors; "all" picks one, the others are fallbacks
-	private val RADIO_SERVERS = listOf("https://all.api.radio-browser.info", "https://de1.api.radio-browser.info",
-		"https://nl1.api.radio-browser.info", "https://fi1.api.radio-browser.info")
+	// Radio Browser asks apps to look its servers up (all.api.radio-browser.info lists them, reverse DNS names
+	// them), in a random order, trying the next one if a request fails. These are known names as a fallback.
+	private val RADIO_FALLBACK = listOf("de2.api.radio-browser.info", "fi1.api.radio-browser.info", "nl1.api.radio-browser.info")
+	@Volatile private var radioServers: List<String>? = null
+	private fun radioServerList(): List<String> {
+		radioServers?.let { return it }
+		val found = try {
+			java.net.InetAddress.getAllByName("all.api.radio-browser.info")
+				.mapNotNull { a -> a.canonicalHostName.takeIf { it.endsWith(".api.radio-browser.info") } }
+				.distinct().shuffled()
+		} catch (e: Exception) { emptyList() }
+		val list = (found + RADIO_FALLBACK).distinct().map { "https://$it" }
+		if (found.isNotEmpty()) radioServers = list
+		return list
+	}
 	private const val MAX = 40
 
 	class Answer(val items: JSONArray, val error: String? = null)
@@ -43,7 +55,7 @@ object DashAudioSources {
 		}
 	} catch (e: Exception) {
 		Log.w(TAG, "Couldn't load $kind", e)
-		Answer(JSONArray(), "Couldn't load that list - is the phone online?")
+		Answer(JSONArray(), "Couldn't load that list: ${e.javaClass.simpleName} ${e.message ?: ""}".trim().take(110))
 	}
 
 	/* ---------- radio ---------- */
@@ -104,9 +116,10 @@ object DashAudioSources {
 
 	private fun radioGet(path: String): String {
 		var last: Exception? = null
-		for (server in RADIO_SERVERS) {
-			try { return get(server + path) } catch (e: Exception) { last = e }
+		for (server in radioServerList()) {
+			try { return get(server + path) } catch (e: Exception) { last = e; Log.w(TAG, "$server didn't answer: $e") }
 		}
+		radioServers = null
 		throw last ?: Exception("No radio directory answered")
 	}
 
