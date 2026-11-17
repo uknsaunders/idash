@@ -283,18 +283,27 @@ function H(sel,v){v=String(v);if(_c.get(sel+'h')===v)return;_c.set(sel+'h',v);$(
 function S(el,k,v){if(el.style[k]!==v)el.style[k]=v}
 const N=window.I3Native||{speak(){},log(){},navigationEnded(){},menu(){return '{}'},navStarted(){},search(){},answer(){},hangup(){},dial(){},media(){},musicOpen(){},musicPick(){},audioList(){},audioPlay(){},audioStop(){},audioCommand(){},video(){return 'nocar'}};
 const log=m=>{try{N.log(String(m))}catch(e){}};
-// OpenStreetMap lookups (chargers, toilets, speed limits). The main Overpass server is often busy and
-// answers with an error page, so check the answer and try the community mirrors in turn.
+// OpenStreetMap lookups (chargers, toilets, speed limits). In the car they go through the phone, which has
+// time limits and tries backup servers; asked from the car screen directly, they could hang for ever.
 const OVERPASS=['https://overpass-api.de/api/interpreter','https://overpass.private.coffee/api/interpreter','https://overpass.kumi.systems/api/interpreter'];
-async function overpass(q){
+const osmWait={};let osmSeq=0;
+window.i3osm=(id,j,problem)=>{const w=osmWait[id];if(!w)return;delete osmWait[id];clearTimeout(w.t);if(j)w.ok(j);else w.no(new Error(problem||'no answer'))};
+async function overpass(q,what){
+  if(typeof N.overpass==='function'){
+    return new Promise((ok,no)=>{const id='q'+(++osmSeq);
+      osmWait[id]={ok,no,t:setTimeout(()=>{delete osmWait[id];no(new Error('no answer in 90 seconds'))},90000)};
+      N.overpass(id,q,what||'places')});
+  }
   let last='no answer';
   for(const base of OVERPASS){
+    const ac=typeof AbortController!=='undefined'?new AbortController():null,tm=ac&&setTimeout(()=>ac.abort(),15000);
     try{
-      const r=await fetch(base+'?data='+encodeURIComponent(q));
+      const r=await fetch(base+'?data='+encodeURIComponent(q),ac?{signal:ac.signal}:undefined);
       const t=await r.text();
       if(!r.ok){last=new URL(base).host+' HTTP '+r.status;log('overpass: '+last);continue}
       try{return JSON.parse(t)}catch(e){last=new URL(base).host+' sent "'+t.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,60)+'"';log('overpass: '+last)}
-    }catch(e){last=new URL(base).host+': '+e.message;log('overpass: '+last)}
+    }catch(e){last=new URL(base).host+': '+(e.name==='AbortError'?'no answer in 15 seconds':e.message);log('overpass: '+last)}
+    finally{if(tm)clearTimeout(tm)}
   }
   throw new Error(last);
 }
@@ -486,7 +495,7 @@ async function fetchLimit(){
   limBusy=true;limTry=Date.now();
   try{
     const q='[out:json][timeout:8];way(around:22,'+pos[1].toFixed(5)+','+pos[0].toFixed(5)+')["highway"]["maxspeed"];out tags 6;';
-    const j=await overpass(q);
+    const j=await overpass(q,'speed limits');
     limKey=key;let best=null;
     for(const e of j.elements||[]){
       const m=String((e.tags||{}).maxspeed).match(/^(\d+)\s*(mph)?/);
@@ -543,7 +552,7 @@ function parseOcm(list){
 }
 async function fetchOsmChargers(){
   const q='[out:json][timeout:15];node["amenity"="charging_station"](around:20000,'+pos[1].toFixed(4)+','+pos[0].toFixed(4)+');out body 80;';
-  const j=await overpass(q);
+  const j=await overpass(q,'chargers');
   return (j.elements||[]).map(e=>{const t=e.tags||{},n=parseInt(t.capacity,10);
     return {lon:e.lon,lat:e.lat,name:t.name||t.operator||t.network||'Charging point',info:n>0?n+(n>1?' points':' point'):''}});
 }
@@ -590,7 +599,7 @@ function chargersMenu(){
 let loos=null,loosAt=null,loosTime=0;
 async function fetchToilets(){
   const q='[out:json][timeout:15];nwr["amenity"="toilets"](around:8000,'+pos[1].toFixed(4)+','+pos[0].toFixed(4)+');out center 80;';
-  const j=await overpass(q);
+  const j=await overpass(q,'toilets');
   return (j.elements||[]).map(e=>{const t=e.tags||{},lat=e.lat!=null?e.lat:e.center&&e.center.lat,lon=e.lon!=null?e.lon:e.center&&e.center.lon;
     if(lat==null||['private','no','customers'].includes(t.access))return null;
     const bits=[];

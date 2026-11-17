@@ -107,6 +107,8 @@ class DashController(val context: Context,
 	@Volatile var carUi: DashCarUi? = null
 	/** slow jobs (music browsing, car screen switches) run here, one at a time, off the main thread */
 	private val worker = java.util.concurrent.Executors.newSingleThreadExecutor()
+	// i3D: slow map lookups run apart from everything else, so they never hold up music or calls
+	private val netWorker = java.util.concurrent.Executors.newFixedThreadPool(2)
 	@Volatile private var mediaController: MediaController? = null
 
 	/** Runs a slow job in the background. Quietly does nothing once the car app is shutting down */
@@ -1145,6 +1147,15 @@ class DashController(val context: Context,
 			background {
 				try { music().reset() } catch (e: Exception) { Log.w(TAG, "Music reset failed", e) }
 				sendMusic(false)
+			}
+		}
+
+		/** An OpenStreetMap lookup, done on the phone. The answer arrives as window.i3osm(id, json or null, problem) */
+		@JavascriptInterface
+		fun overpass(id: String, query: String, what: String) {
+			netWorker.execute {
+				val (json, problem) = try { DashOverpass.query(query, what) } catch (e: Exception) { Pair(null, e.toString()) }
+				js("window.i3osm && window.i3osm(${JSONObject.quote(id)}, ${json ?: "null"}, ${JSONObject.quote(problem ?: "")})")
 			}
 		}
 
