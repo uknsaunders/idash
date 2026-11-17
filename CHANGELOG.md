@@ -3,6 +3,10 @@
 Newest first. The app is built automatically and published as `i3-dash.apk` on the
 [`i3dash-latest` release](https://github.com/uknsaunders/idash/releases/tag/i3dash-latest), so the date below is when each change was made.
 
+## 17 November 2026, no AAIdrive welcome pages
+
+- **Straight to i3D's home screen:** after a fresh install, the phone app no longer shows AAIdrive's original welcome pages, which looked like the old app. i3D's home screen has its own setup checklist.
+
 ## 15 November 2026, a clearer connection log
 
 - **How the phone is attached:** "Connected" and "Waiting" lines now say whether the phone is on USB, Bluetooth only, or neither.

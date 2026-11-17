@@ -22,11 +22,10 @@ class NavHostActivity: AppCompatActivity() {
 		}
 		CarInformation.loadCache(MutableAppSettingsReceiver(applicationContext))
 
+		// i3D: skip AAIdrive's own welcome pages - i3D's home screen has its own setup checklist,
+		// and the old pages (which say "AAIdrive") look like the wrong app after a fresh install
 		if (!AppSettings[AppSettings.KEYS.FIRST_START_DONE].toBoolean()) {
-			val intent = Intent(this, WelcomeActivity::class.java)
-			startActivity(intent)
-			finish()
-			return
+			AppSettings.saveSetting(this, AppSettings.KEYS.FIRST_START_DONE, "true")
 		}
 
 		setContentView(R.layout.activity_navhost)
