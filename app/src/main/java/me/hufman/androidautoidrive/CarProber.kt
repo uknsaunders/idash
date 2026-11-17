@@ -24,6 +24,10 @@ class CarProber(val securityAccess: SecurityAccess, val settings: AppSettings, v
 
 	var handler: Handler? = null
 	var carConnection: BMWRemotingServer? = null
+	// i3D: the check connection is closed once the car is found (the link through MyBMW has been locking up
+	// when a second connection opens beside it), so the link is watched by whether its port is still open
+	private var linkedHost: String? = null
+	private var linkedPort: Int = 0
 
 	val ProberTask = Runnable {
 		val configuredIps = settings[AppSettings.KEYS.CONNECTION_PROBE_IPS]
@@ -47,22 +51,29 @@ class CarProber(val securityAccess: SecurityAccess, val settings: AppSettings, v
 		// scan the car ports from local BCL tunnel
 		probeHost("127.0.0.1")
 		schedule(2000)
-		if (IDriveConnectionStatus.isConnected && carConnection == null) {
+		if (IDriveConnectionStatus.isConnected && carConnection == null && linkedHost == null) {
 			// weird state, assert that we really have no connection
 			IDriveConnectionStatus.reset()
 		}
 	}
 
 	val KeepaliveTask = Runnable {
-		if (!pingCar()) {
+		if (!linkStillOpen()) {
 			// car has disconnected
 			Log.i(TAG, "Previously-connected car has disconnected")
 			ConnectionLog.problem("The car stopped answering - looking for it again")
+			linkedHost = null
 			IDriveConnectionStatus.reset()
 			schedule(5000)
 		}
 
-		schedule(5000)
+		schedule(15000)
+	}
+
+	/** Whether the car link's port still accepts connections, without signing in */
+	private fun linkStillOpen(): Boolean {
+		val host = linkedHost ?: return pingCar()
+		return probePort(host, linkedPort) || probePort(host, linkedPort)       // a second try, in case of a blip
 	}
 
 	override fun onLooperPrepared() {
@@ -71,7 +82,7 @@ class CarProber(val securityAccess: SecurityAccess, val settings: AppSettings, v
 	}
 
 	private fun isConnected(): Boolean {
-		return IDriveConnectionStatus.isConnected && carConnection != null
+		return IDriveConnectionStatus.isConnected && (carConnection != null || linkedHost != null)
 	}
 
 	fun schedule(delay: Long) {
@@ -197,6 +208,14 @@ class CarProber(val securityAccess: SecurityAccess, val settings: AppSettings, v
 
 	private fun setConnectedState(host: String, port: Int, brand: String) {
 		Log.i(TAG, "Successfully detected $brand connection at port $host:$port")
+		// i3D: close the check connection, leaving the link free for the car apps
+		carConnection?.let { conn ->
+			try { IDriveConnection.disconnectEtchConnection(conn) } catch (e: Exception) { }
+		}
+		carConnection = null
+		linkedHost = host
+		linkedPort = port
+		ConnectionLog.event("Signed in; closed the check connection to leave the link free")
 		IDriveConnectionStatus.setConnection(brand, host, port)
 	}
 }

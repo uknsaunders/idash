@@ -3,6 +3,11 @@
 Newest first. The app is built automatically and published as `i3-dash.apk` on the
 [`i3dash-latest` release](https://github.com/uknsaunders/idash/releases/tag/i3dash-latest), so the date below is when each change was made.
 
+## 17 November 2026, one connection at a time
+
+- **The check connection closes once the car is found:** the connection log showed the car accepting the first sign-in, then the link through MyBMW locking up as soon as a second connection opened beside it. The check that finds the car now closes its own connection straight away, and watches the link by whether its port is still open (every 15 seconds) instead of keeping a signed-in connection.
+- Not yet tried in the car.
+
 ## 17 November 2026, a second way to read the car's details
 
 - **Fallback sign-in:** the first thing the app does after connecting is read the car's details. It signs in for that as MyBMW's own component (cdsbaseapp). If the car stops answering, it now tries again as the certificate the connection check has just used successfully, and remembers whichever works.
