@@ -22,6 +22,7 @@ This is a personal fork of [AAIdrive](https://github.com/BimmerGestalt/AAIdrive)
 | **Call** | Favourites, recent calls and all your contacts, dialled from the knob. |
 | **Navigate** | Full-screen 3D map, routing with spoken directions, live speed limit with an over-limit warning, and chargers. |
 | **Settings** | Day, night or automatic display, the car colour, and battery details - the home for the smaller, less-used things. |
+| **Android Auto** | Your phone's Android Auto on the iDrive screen, driven by the knob. Needs some setting up first; see [Android Auto](#android-auto-experimental). |
 
 Calls show a panel with the name, number and time. Press the knob to answer, decline or hang up.
 
@@ -118,6 +119,23 @@ Share a place from Google Maps or any app and choose **i3 Dash**, or open the ap
 ### YouTube (parked only)
 
 Share a YouTube video or playlist to i3D from the YouTube app, or paste the link into **Send to car**, and tap **Play on car**. It plays on the car screen with sound through the phone, only while the car is standing still. Videos you send are kept in the car's menu under **Video**, so you can start them again without the phone. If the car starts moving it stops and the dashboard comes back, and turning or pressing the knob stops it too. If the car gives no speed reading, video will not start. It has not been tried in a car yet, and YouTube can refuse to play some videos in an embedded player.
+
+### Android Auto (experimental)
+
+i3D can show your phone's own Android Auto on the car screen, from the **Android Auto** card on the home screen. It goes through the same MyBMW link as the rest of i3D, so nothing in the car is changed. i3D acts as the Android Auto "head unit" on the phone itself: Android Auto draws its screen for i3D, and i3D sends it to the car as pictures, the same way as the dash.
+
+- **The knob:** turn to move around Android Auto, press once to choose, press twice to go back, press three times to return to i3D's cards. Android Auto keeps running behind i3D, so going back to it is quick. The car's own BACK button leaves i3D as usual.
+- **Sound:** plays on the phone, so it reaches the car over Bluetooth like other apps. The Assistant and calls use the phone's microphone.
+- **While moving:** i3D tells Android Auto when the car is moving, so it holds back the things it doesn't allow while driving.
+- **The picture** updates as fast as the MyBMW link carries pictures, which is slower than a built-in Android Auto screen. Fine for maps and lists, not for anything fast.
+
+Setting up, on the phone (tap **Android Auto on the car screen** on i3D's home screen, which walks through these):
+
+1. **A head unit certificate.** Android Auto only talks to screens that present one, and i3D doesn't include one. You supply a PEM file with the certificate and its RSA private key. Open-source Android Auto head unit projects publish the one they use. Using it is between you and Google's terms.
+2. **Android Auto's developer setting.** In Android Auto's settings, tap Version about ten times to turn on developer settings, then choose **Start head unit server** from the three-dot menu. Android Auto then waits for i3D on the phone itself.
+3. **Check:** the setup screen's check button says whether Android Auto is listening.
+
+Not yet tried in the car. Android Auto may change or remove the head unit server setting in an update.
 
 ### Getting your API keys (optional)
 

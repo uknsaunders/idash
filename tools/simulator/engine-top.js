@@ -96,6 +96,10 @@ window.I3Native={
     if(sim.level===0){sim.level=1;sim.pickApp=i;window.i3music({rows:['‹ Back'].concat(LISTS),top:false,played:false})}
     else if(i===0){sim.level=0;musicTop()}
     else{sim.app=sim.pickApp;sim.music=true;sim.playing=true;sim.track=i%TRACKS.length;sim.posMs=0;say('Playing "'+LISTS[i-1]+'" on '+APPS[sim.app]);window.i3music({rows:[],top:false,played:true})}},350)},
-  video(id){if(sim.speedKmh>0){say('Video refused: the car is moving');return 'moving'}say('The video would take over the screen here (not shown in the simulator)');return 'sent'}
+  video(id){if(sim.speedKmh>0){say('Video refused: the car is moving');return 'moving'}say('The video would take over the screen here (not shown in the simulator)');return 'sent'},
+  // Android Auto: the phone's picture would cover the whole screen; three knob presses come back
+  androidAuto(night){say('Android Auto would take over the screen here ('+(night?'night':'day')+' colours). Not shown in the simulator.');return 'started'},
+  androidAutoLine(){return 'Your phone\'s apps on this screen'},
+  night(){}
 };
 })();

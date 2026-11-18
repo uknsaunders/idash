@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="home_send">Send to car</string>
+    <string name="home_android_auto">Android Auto on the car screen</string>
+    <string name="home_android_auto_sub">Set up the certificate and Android Auto\'s head unit setting</string>
+    <string name="home_android_auto_ready">Set up. Choose the Android Auto card in the car</string>
     <string name="home_send_sub">A place, postcode, what3words or a Google Maps link</string>
     <string name="home_music_sub">Choose which music apps show in the car</string>
     <string name="home_notifications_sub">Messages and alerts on the car screen</string>

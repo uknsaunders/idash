@@ -4,7 +4,8 @@ name: i3 Dash
 # and publishes it on the "latest" release page for downloading on the phone.
 on:
   push:
-    branches: [main]
+    # main publishes the app; the other branches are only built and checked, and their app kept with the run
+    branches: [main, android-auto]
   workflow_dispatch:
 
 permissions:
@@ -45,7 +46,28 @@ jobs:
           W3W_API_KEY: ${{ secrets.W3W_API_KEY }}
           # a Spotify Client ID (not a secret, but kept out of the code) so Spotify can be listed and searched
           AndroidAutoIdrive_SpotifyApiKey: ${{ secrets.ANDROIDAUTOIDRIVE_SPOTIFYAPIKEY }}
-        run: ./gradlew assembleNomapNonalyticsFullDebug --stacktrace
+        shell: bash
+        run: |
+          set -o pipefail
+          ./gradlew assembleNomapNonalyticsFullDebug --stacktrace 2>&1 | tee build.log
+
+      - name: Run the Android Auto checks
+        shell: bash
+        run: |
+          set -o pipefail
+          ./gradlew testNomapNonalyticsFullDebugUnitTest --tests 'me.hufman.androidautoidrive.androidauto.*' 2>&1 | tee test.log
+
+      - name: Show what went wrong
+        if: failure()
+        shell: bash
+        run: |
+          # compiler errors and failed checks become notes on the run, readable without signing in
+          for f in build.log test.log; do
+            [ -f "$f" ] || continue
+            grep -E '^e: |error:|FAILED|Exception|Expected|AssertionError' "$f" | head -40 | while IFS= read -r line; do
+              echo "::error::${line//%/%25}"
+            done
+          done
 
       - name: Name the app file
         run: |
@@ -61,6 +83,7 @@ jobs:
           retention-days: 14
 
       - name: Publish to the latest release
+        if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: i3dash-latest

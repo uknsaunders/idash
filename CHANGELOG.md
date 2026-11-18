@@ -3,6 +3,14 @@
 Newest first. The app is built automatically and published as `i3-dash.apk` on the
 [`i3dash-latest` release](https://github.com/uknsaunders/idash/releases/tag/i3dash-latest), so the date below is when each change was made.
 
+## 18 November 2026, Android Auto on the car screen (experimental)
+
+- **New Android Auto card** on the home screen's top row: your phone's Android Auto on the iDrive screen, through the same MyBMW link. i3D plays the part of an Android Auto head unit on the phone, decodes Android Auto's picture onto its hidden screen and sends it to the car like the dash.
+- **The knob:** turn to move, press to choose, press twice for back, three times for i3D's cards.
+- **Sound and microphone** go through the phone. Driving and night mode are passed to Android Auto.
+- **Setting up:** a new **Android Auto on the car screen** item in the phone app adds the head unit certificate (not included) and explains Android Auto's **Start head unit server** setting, with a check that it's listening.
+- Checked against a pretend phone in the automatic tests; not yet tried with real Android Auto or in the car.
+
 ## 17 November 2026, one connection at a time
 
 - **The check connection closes once the car is found:** the connection log showed the car accepting the first sign-in, then the link through MyBMW locking up as soon as a second connection opened beside it. The check that finds the car now closes its own connection straight away, and watches the link by whether its port is still open (every 15 seconds) instead of keeping a signed-in connection.

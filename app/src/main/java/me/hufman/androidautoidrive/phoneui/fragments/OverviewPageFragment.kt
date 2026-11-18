@@ -259,6 +259,10 @@ class OverviewPageFragment: Fragment() {
 		val main = listOf(
 			Tile(R.drawable.ic_send_feather, R.string.home_send, R.string.home_send_sub) {
 				startActivity(Intent(ctx, SendDestinationActivity::class.java))
+			},
+			Tile(R.drawable.ic_cellphone_android, R.string.home_android_auto,
+				if (me.hufman.androidautoidrive.carapp.dash.DashAndroidAuto.hasCertificate(ctx)) R.string.home_android_auto_ready else R.string.home_android_auto_sub) {
+				startActivity(Intent(ctx, me.hufman.androidautoidrive.carapp.dash.AndroidAutoSetupActivity::class.java))
 			}
 		)
 
