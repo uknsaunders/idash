@@ -78,7 +78,7 @@ class AndroidAutoController(val context: Context,
 	}
 
 	/** No speed reading counts as moving, so Android Auto stays careful */
-	private fun isMoving(): Boolean = (speedKmh ?: return true) >= 3.0
+	private fun isMoving(): Boolean = (speedKmh ?: 99.0) >= 3.0
 
 	/** Night by where the sun is, at the car's position (or Jersey until it has one) */
 	private fun isNight(): Boolean {
