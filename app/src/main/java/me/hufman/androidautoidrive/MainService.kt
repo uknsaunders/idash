@@ -498,7 +498,16 @@ class MainService: Service() {
 			@Suppress("DEPRECATION")
 			packageManager.queryIntentServices(intentService, 0)
 		}
+		// the Android Auto app and i3D are built from the same code: each starts only its own car apps
+		val androidAutoApps = setOf(
+				"me.hufman.androidautoidrive.carapp.androidauto.AndroidAutoAppService",
+				"me.hufman.androidautoidrive.carapp.carinfo.CarInformationDiscoveryService"     // the car's speed
+		)
 		results.forEach { resolveInfo ->
+			val name = resolveInfo.serviceInfo.name
+			val ours = if (BuildConfig.ANDROID_AUTO_ONLY) name in androidAutoApps
+					else name != "me.hufman.androidautoidrive.carapp.androidauto.AndroidAutoAppService"
+			if (!ours) return@forEach
 			if (iDriveConnectionReceiver.brand == "bmw" ||
 					iDriveConnectionReceiver.brand == "mini" ||
 					resolveInfo.serviceInfo.name in j29Services) {

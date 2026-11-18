@@ -49,7 +49,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          ./gradlew assembleNomapNonalyticsFullDebug --stacktrace 2>&1 | tee build.log
+          ./gradlew assembleNomapNonalyticsFullDebug assembleNomapNonalyticsAaDebug --stacktrace 2>&1 | tee build.log
 
       - name: Run the Android Auto checks
         shell: bash
@@ -73,6 +73,7 @@ jobs:
         run: |
           mkdir dist
           cp app/build/outputs/apk/nomapNonalyticsFull/debug/*.apk dist/i3-dash.apk
+          cp app/build/outputs/apk/nomapNonalyticsAa/debug/*.apk dist/i3-android-auto.apk
           ls -la dist
 
       - name: Keep a copy with this build
@@ -80,6 +81,13 @@ jobs:
         with:
           name: i3-dash
           path: dist/i3-dash.apk
+          retention-days: 14
+
+      - name: Keep a copy of the Android Auto app with this build
+        uses: actions/upload-artifact@v4
+        with:
+          name: i3-android-auto
+          path: dist/i3-android-auto.apk
           retention-days: 14
 
       - name: Publish to the latest release
@@ -94,3 +102,17 @@ jobs:
             Latest i3 Dash build from commit ${{ github.sha }}.
             Download **i3-dash.apk** on your phone and open it to install.
           files: dist/i3-dash.apk
+
+      - name: Publish the Android Auto app
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-auto-latest
+          name: i3 Android Auto (latest build)
+          prerelease: true
+          make_latest: false
+          body: |
+            Latest i3 Android Auto build from commit ${{ github.sha }}.
+            A separate app from i3D, built from the same code: your phone's Android Auto on the iDrive screen.
+            Download **i3-android-auto.apk** on your phone and open it to install.
+          files: dist/i3-android-auto.apk

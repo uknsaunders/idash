@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The separate Android Auto app: the same code as i3D, with its own name -->
+<resources>
+    <string name="app_name">i3 Android Auto</string>
+    <string name="home_section_main">Android Auto</string>
+    <string name="home_step_onscreen">Android Auto on the car screen</string>
+    <string name="home_car_note">In the car, open ConnectedDrive and choose Android Auto. Turn the knob to move, press once to choose, twice to go back, three times for Android Auto\'s home screen.</string>
+    <color name="aa_launcher_background">#1E8E3E</color>
+</resources>

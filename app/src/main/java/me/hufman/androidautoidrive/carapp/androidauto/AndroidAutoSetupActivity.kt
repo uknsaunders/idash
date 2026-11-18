@@ -1,4 +1,4 @@
-package me.hufman.androidautoidrive.carapp.dash
+package me.hufman.androidautoidrive.carapp.androidauto
 
 import android.app.Activity
 import android.content.Intent
@@ -17,8 +17,8 @@ import java.net.Socket
 import kotlin.concurrent.thread
 
 /**
- * The phone side of Android Auto in i3D: adding the head unit certificate, the Android Auto developer
- * setting that lets i3D connect, and a check that Android Auto is listening.
+ * The phone side of the Android Auto app: adding the head unit certificate, the Android Auto developer
+ * setting that lets this app connect, and a check that Android Auto is listening.
  */
 class AndroidAutoSetupActivity: Activity() {
 	companion object {
@@ -37,12 +37,13 @@ class AndroidAutoSetupActivity: Activity() {
 			setPadding(dp(20), dp(24), dp(20), dp(32))
 		}
 		list.addView(text("Android Auto on the car screen", 24f, bold = true))
-		list.addView(text("i3D can show your phone's Android Auto on the iDrive screen, as a card on i3D's home screen. " +
-				"Turn the knob to move around Android Auto, press once to choose, twice to go back, and three times to return to i3D's cards. " +
+		list.addView(text("This app shows your phone's Android Auto on the iDrive screen, through the MyBMW app's link, the same way i3D shows its dash. " +
+				"In the car it is the Android Auto entry under ConnectedDrive. Turn the knob to move around Android Auto, press once to choose, " +
+				"twice to go back, and three times for Android Auto's home screen. " +
 				"Sound plays through the phone, so it reaches the car over Bluetooth like other apps.", 15f))
 
 		list.addView(section("1. Head unit certificate"))
-		list.addView(text("Android Auto only talks to screens that present a head unit certificate. i3D doesn't come with one. " +
+		list.addView(text("Android Auto only talks to screens that present a head unit certificate. This app doesn't come with one. " +
 				"Choose a file with the certificate and its private key in PEM form (the text blocks that start " +
 				"-----BEGIN CERTIFICATE----- and -----BEGIN RSA PRIVATE KEY-----). It stays on this phone.", 15f))
 		certStatus = text("", 16f, bold = true)
@@ -52,17 +53,17 @@ class AndroidAutoSetupActivity: Activity() {
 			try { startActivityForResult(pick, PICK_CERTIFICATE) } catch (e: Exception) { toast("This phone has no file picker") }
 		})
 		removeButton = button("Remove the certificate") {
-			DashAndroidAuto.certificateFile(this).delete()
+			AndroidAutoSession.certificateFile(this).delete()
 			refresh()
 		}
 		list.addView(removeButton)
 
-		list.addView(section("2. Let i3D connect to Android Auto"))
+		list.addView(section("2. Let this app connect to Android Auto"))
 		list.addView(text("Do this once on the phone. It may need doing again after the phone or Android Auto updates.\n\n" +
 				"a. Open Android Auto's settings (button below, or Settings › Connected devices › Android Auto).\n" +
 				"b. Scroll to the bottom and tap Version about ten times, until it offers developer settings. Allow them.\n" +
 				"c. Tap the three dots at the top right and choose Start head unit server.\n\n" +
-				"Android Auto then waits for i3D on this phone. Nothing is opened to other devices.", 15f))
+				"Android Auto then waits for this app on the phone. Nothing is opened to other devices.", 15f))
 		list.addView(button("Open Android Auto's settings") { openAndroidAuto() })
 
 		list.addView(section("3. Check"))
@@ -71,8 +72,8 @@ class AndroidAutoSetupActivity: Activity() {
 		list.addView(linkStatus)
 
 		list.addView(section("In the car"))
-		list.addView(text("Open i3D on the car screen and choose the Android Auto card. If it can't connect, the screen says why. " +
-				"Android Auto carries on behind i3D until the car disconnects, so coming back to it is quick.", 15f))
+		list.addView(text("On the car, open ConnectedDrive and choose Android Auto. If it can't connect, the screen says why. " +
+				"Android Auto keeps running while you use the car's own menus, so coming back to it is quick.", 15f))
 
 		val scroll = ScrollView(this)
 		scroll.addView(list)
@@ -81,7 +82,7 @@ class AndroidAutoSetupActivity: Activity() {
 	}
 
 	private fun refresh() {
-		val has = DashAndroidAuto.hasCertificate(this)
+		val has = AndroidAutoSession.hasCertificate(this)
 		certStatus.text = if (has) "✓  Certificate added" else "○  No certificate yet"
 		removeButton.visibility = if (has) View.VISIBLE else View.GONE
 	}
@@ -94,9 +95,9 @@ class AndroidAutoSetupActivity: Activity() {
 		thread {
 			val result = try {
 				val pem = contentResolver.openInputStream(uri)?.use { it.readBytes().toString(Charsets.UTF_8) } ?: ""
-				val problem = DashAndroidAuto.checkCertificate(pem)
+				val problem = AndroidAutoSession.checkCertificate(pem)
 				if (problem == null) {
-					DashAndroidAuto.certificateFile(this).writeText(pem)
+					AndroidAutoSession.certificateFile(this).writeText(pem)
 					"Certificate added"
 				} else {
 					"That file can't be used: $problem"
@@ -131,8 +132,8 @@ class AndroidAutoSetupActivity: Activity() {
 		linkStatus.text = "Checking…"
 		thread {
 			val result = try {
-				Socket().use { it.connect(InetSocketAddress("127.0.0.1", DashAndroidAuto.PORT), 2000) }
-				"✓  Android Auto is listening. " + (if (DashAndroidAuto.hasCertificate(this)) "Ready for the car." else "Add the certificate too.")
+				Socket().use { it.connect(InetSocketAddress("127.0.0.1", AndroidAutoSession.PORT), 2000) }
+				"✓  Android Auto is listening. " + (if (AndroidAutoSession.hasCertificate(this)) "Ready for the car." else "Add the certificate too.")
 			} catch (e: Exception) {
 				"○  Android Auto isn't listening. Do step 2c (Start head unit server), then check again."
 			}

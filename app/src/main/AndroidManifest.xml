@@ -34,11 +34,11 @@
     <!-- But don't require Bluetooth support -->
     <uses-feature android:name="android.hardware.bluetooth" android:required="false" />
 
-    <permission android:name="me.hufman.androidautoidrive.i3dash.permission.CDS_normal"
+    <permission android:name="${applicationId}.permission.CDS_normal"
         android:description="@string/permission_cds_normal"
         android:label="@string/permission_cds_normal"
         android:protectionLevel="normal"/>
-    <permission android:name="me.hufman.androidautoidrive.i3dash.permission.CDS_personal"
+    <permission android:name="${applicationId}.permission.CDS_personal"
         android:description="@string/permission_cds_personal"
         android:label="@string/permission_cds_personal"
         android:protectionLevel="dangerous"/>
@@ -95,8 +95,8 @@
         <activity android:name=".phoneui.SpotifyAuthorizationActivity" />
 
         <activity
-            android:name=".carapp.dash.AndroidAutoSetupActivity"
-            android:label="Android Auto in i3D"
+            android:name=".carapp.androidauto.AndroidAutoSetupActivity"
+            android:label="Android Auto setup"
             android:exported="false"
             android:theme="@android:style/Theme.DeviceDefault" />
 
@@ -1108,6 +1108,11 @@
                 <action android:name="me.hufman.androidautoidrive.carconnection.service" />
             </intent-filter>
         </service>
+        <service android:name=".carapp.androidauto.AndroidAutoAppService" android:exported="false">
+            <intent-filter>
+                <action android:name="me.hufman.androidautoidrive.carconnection.service" />
+            </intent-filter>
+        </service>
         <service android:name=".carapp.carinfo.CarInfoAppService" android:exported="false">
             <intent-filter>
                 <action android:name="me.hufman.androidautoidrive.carconnection.service" />
@@ -1171,37 +1176,37 @@
             android:authorities="${applicationId}.cardata"
             android:name="me.hufman.androidautoidrive.CDSContentProvider"
             android:exported="true"
-            android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_normal"
+            android:readPermission="${applicationId}.permission.CDS_normal"
             >
-            <path-permission android:path="/cds/10" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/communication.currentCallInfo" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/11" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/communication.lastCallInfo" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/57" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/navigation.currentPositionDetailedInfo" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/59" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/navigation.finalDestination" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/60" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/navigation.finalDestinationDetailedInfo" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/61" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/navigation.GPSExtendedInfo" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/62" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/navigation.GPSPosition" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/63" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/navigation.guidanceStatus" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/64" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/65" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/navigation.infoToNextDestination" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/66" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/navigation.nextDestination" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/67" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/navigation.nextDestinationDetailedInfo" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/87" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/vehicle.VIN" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/558" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/communication.atmId" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/702" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
-            <path-permission android:path="/cds/navigation.triplist" android:readPermission="me.hufman.androidautoidrive.i3dash.permission.CDS_personal" />
+            <path-permission android:path="/cds/10" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/communication.currentCallInfo" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/11" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/communication.lastCallInfo" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/57" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/navigation.currentPositionDetailedInfo" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/59" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/navigation.finalDestination" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/60" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/navigation.finalDestinationDetailedInfo" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/61" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/navigation.GPSExtendedInfo" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/62" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/navigation.GPSPosition" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/63" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/navigation.guidanceStatus" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/64" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/65" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/navigation.infoToNextDestination" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/66" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/navigation.nextDestination" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/67" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/navigation.nextDestinationDetailedInfo" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/87" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/vehicle.VIN" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/558" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/communication.atmId" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/702" android:readPermission="${applicationId}.permission.CDS_personal" />
+            <path-permission android:path="/cds/navigation.triplist" android:readPermission="${applicationId}.permission.CDS_personal" />
         </provider>
 
         <meta-data

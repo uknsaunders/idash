@@ -1,4 +1,4 @@
-package me.hufman.androidautoidrive.carapp.dash
+package me.hufman.androidautoidrive.carapp.androidauto
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -23,15 +23,15 @@ import java.util.concurrent.Executors
 /**
  * Android Auto on the iDrive screen.
  *
- * i3D plays the part of an Android Auto head unit, on the phone itself: it connects to Android Auto's
+ * This app plays the part of an Android Auto head unit, on the phone itself: it connects to Android Auto's
  * head unit server (Android Auto's developer setting, on port 5277), decodes the picture onto a surface
- * on i3D's hidden display (which already goes to the car as pictures), plays the sound on the phone
+ * on a hidden display (which goes to the car as pictures, as i3D's dash does), plays the sound on the phone
  * (so it reaches the car over Bluetooth like any other app), and passes the iDrive knob to Android Auto
  * as a rotary controller.
  */
-class DashAndroidAuto(private val context: Context, private val screenWidth: Int, private val screenHeight: Int) {
+class AndroidAutoSession(private val context: Context, private val screenWidth: Int, private val screenHeight: Int) {
 	companion object {
-		const val TAG = "i3DAndroidAuto"
+		const val TAG = "i3AndroidAuto"
 		const val PORT = 5277
 		const val CERT_FILE = "android-auto-headunit.pem"
 		/** Android Auto lays itself out for this screen density */
@@ -74,7 +74,7 @@ class DashAndroidAuto(private val context: Context, private val screenWidth: Int
 	fun start() {
 		if (wanted) return
 		wanted = true
-		thread = Thread({ connectLoop() }, "i3D Android Auto").also { it.start() }
+		thread = Thread({ connectLoop() }, "Android Auto link").also { it.start() }
 	}
 
 	@Synchronized
@@ -102,7 +102,7 @@ class DashAndroidAuto(private val context: Context, private val screenWidth: Int
 			try {
 				val file = certificateFile(context)
 				if (!hasCertificate(context)) {
-					status("No head unit certificate yet. Add one in the i3D phone app")
+					status("No head unit certificate yet. Add one in the phone app")
 					return
 				}
 				val ssl = Credentials.sslContext(file.readText())
@@ -148,6 +148,7 @@ class DashAndroidAuto(private val context: Context, private val screenWidth: Int
 	fun rotate(steps: Int) = send("a knob turn") { it.rotate(steps) }
 	fun select() = send("a press") { it.key(HeadUnit.KEY_DPAD_CENTER) }
 	fun back() = send("back") { it.key(HeadUnit.KEY_BACK) }
+	fun home() = send("home") { it.key(HeadUnit.KEY_HOME) }
 	fun setNight(night: Boolean) {
 		this.night = night
 		send("night mode") { it.setNight(night) }
@@ -277,7 +278,7 @@ class DashAndroidAuto(private val context: Context, private val screenWidth: Int
 	private fun startMicrophone() {
 		if (micThread != null) return
 		if (context.checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-			status("Android Auto wants the microphone. Allow i3D the microphone in the phone app")
+			status("Android Auto wants the microphone. Allow it in the phone app")
 			return
 		}
 		val t = Thread({
@@ -303,7 +304,7 @@ class DashAndroidAuto(private val context: Context, private val screenWidth: Int
 				try { recorder.stop() } catch (e: Exception) {}
 				recorder.release()
 			}
-		}, "i3D Android Auto microphone")
+		}, "Android Auto microphone")
 		micThread = t
 		t.start()
 	}

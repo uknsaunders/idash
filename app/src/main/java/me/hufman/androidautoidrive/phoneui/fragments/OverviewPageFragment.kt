@@ -213,6 +213,10 @@ class OverviewPageFragment: Fragment() {
 		}
 
 		// one list for everything the phone has to allow, shown until it is all done
+		if (me.hufman.androidautoidrive.BuildConfig.ANDROID_AUTO_ONLY) {
+			buildAndroidAutoTiles(ctx, container)
+			return
+		}
 		val notificationsOk = hasNotificationAccess(ctx)
 		val callsOk = hasCallAccess(ctx)
 		val voiceOk = hasVoiceAccess(ctx)
@@ -259,10 +263,6 @@ class OverviewPageFragment: Fragment() {
 		val main = listOf(
 			Tile(R.drawable.ic_send_feather, R.string.home_send, R.string.home_send_sub) {
 				startActivity(Intent(ctx, SendDestinationActivity::class.java))
-			},
-			Tile(R.drawable.ic_cellphone_android, R.string.home_android_auto,
-				if (me.hufman.androidautoidrive.carapp.dash.DashAndroidAuto.hasCertificate(ctx)) R.string.home_android_auto_ready else R.string.home_android_auto_sub) {
-				startActivity(Intent(ctx, me.hufman.androidautoidrive.carapp.dash.AndroidAutoSetupActivity::class.java))
 			}
 		)
 
@@ -293,6 +293,27 @@ class OverviewPageFragment: Fragment() {
 		container.addView(sectionLabel(ctx, R.string.home_section_extras))
 		container.addView(noteLabel(ctx, R.string.home_extras_note))
 		extras.forEach { container.addView(tileView(ctx, it)) }
+	}
+
+	/** The separate Android Auto app: its setup, the microphone, and the usual More items */
+	private fun buildAndroidAutoTiles(ctx: Context, container: LinearLayout) {
+		val nav = findNavController()
+		val ready = me.hufman.androidautoidrive.carapp.androidauto.AndroidAutoSession.hasCertificate(ctx)
+		val micOk = ContextCompat.checkSelfPermission(ctx, android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED
+		container.addView(sectionLabel(ctx, R.string.home_section_main))
+		container.addView(tileView(ctx, Tile(R.drawable.ic_cellphone_android, R.string.home_android_auto,
+			if (ready) R.string.home_android_auto_ready else R.string.home_android_auto_sub) {
+			startActivity(Intent(ctx, me.hufman.androidautoidrive.carapp.androidauto.AndroidAutoSetupActivity::class.java))
+		}))
+		container.addView(tileView(ctx, Tile(R.drawable.ic_mic_feather, R.string.home_android_auto_mic,
+			if (micOk) R.string.home_setup_done else R.string.home_android_auto_mic_sub,
+			if (micOk) "✓" else "›") {
+			if (!micOk) requestPermissions(arrayOf(android.Manifest.permission.RECORD_AUDIO), 44)
+		}))
+		container.addView(noteLabel(ctx, R.string.home_car_note))
+		container.addView(sectionLabel(ctx, R.string.home_section_more))
+		container.addView(tileView(ctx, Tile(R.drawable.ic_settings_feather, R.string.menu_settings, R.string.home_settings_sub) { nav.navigate(R.id.nav_settings) }))
+		container.addView(tileView(ctx, Tile(R.drawable.ic_heart_feather, R.string.menu_support, R.string.home_support_sub) { nav.navigate(R.id.nav_support) }))
 	}
 
 	private fun noteLabel(ctx: Context, text: Int) = TextView(ctx).apply {

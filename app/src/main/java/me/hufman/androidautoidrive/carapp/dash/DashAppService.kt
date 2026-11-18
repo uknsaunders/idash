@@ -36,7 +36,7 @@ class DashAppService: CarAppService() {
 	var dashController: DashController? = null
 	var interactionListener: MapsInteractionControllerListener? = null
 
-	override fun shouldStartApp(): Boolean = true
+	override fun shouldStartApp(): Boolean = !me.hufman.androidautoidrive.BuildConfig.ANDROID_AUTO_ONLY   // not in the separate Android Auto app
 	override val logName: String = "i3D"
 
 	override fun onCarStart() {

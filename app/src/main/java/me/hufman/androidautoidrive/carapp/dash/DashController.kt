@@ -87,8 +87,6 @@ class DashController(val context: Context,
 		const val REVERSE_WATCH_MAX_MS = 10 * 60 * 1000L
 		/** how long a call placed from the dashboard is shown before the phone itself reports it */
 		const val DIAL_GRACE_MS = 6000L
-		/** Presses of the knob closer together than this count as one double or triple press in Android Auto */
-		const val AA_PRESS_WINDOW_MS = 400L
 
 		/** The running dashboard, so the phone screen can hand it destinations */
 		@Volatile var instance: DashController? = null
@@ -232,12 +230,6 @@ class DashController(val context: Context,
 	private val pushRunnable = object: Runnable {
 		override fun run() {
 			if (!pushing) return
-			if (aaOn) {
-				// Android Auto is on screen: it only needs to know whether the car is moving
-				androidAuto?.setMoving(isMoving())
-				handler.postDelayed(this, PUSH_INTERVAL_MS)
-				return
-			}
 			if (videoOn) {
 				// YouTube is on screen: only watch for the car moving
 				if (isMoving()) {
@@ -277,7 +269,6 @@ class DashController(val context: Context,
 		presentation?.dismiss()
 		presentation = null
 		pageLoaded = false
-		aaOn = false
 	}
 
 	override fun showMap() {
@@ -332,10 +323,6 @@ class DashController(val context: Context,
 
 	private fun knob(steps: Int) {
 		mapAppMode.startInteraction()
-		if (aaOn) {
-			androidAuto?.rotate(steps)
-			return
-		}
 		if (videoOn) {
 			stopVideo()     // any knob turn leaves the video
 			return
@@ -351,16 +338,10 @@ class DashController(val context: Context,
 	}
 
 	/** The knob press opens the dashboard's own menu, so the car never leaves the dashboard */
-	override fun handlesClick(): Boolean = pageLoaded || videoOn || aaOn
+	override fun handlesClick(): Boolean = pageLoaded || videoOn
 
 	override fun click() {
 		mapAppMode.startInteraction()
-		if (aaOn) {
-			aaPresses++
-			handler.removeCallbacks(aaPressRunnable)
-			handler.postDelayed(aaPressRunnable, AA_PRESS_WINDOW_MS)
-			return
-		}
 		if (videoOn) {
 			stopVideo()
 			return
@@ -462,59 +443,6 @@ class DashController(val context: Context,
 	override fun musicReset() { try { music().reset() } catch (e: Exception) { Log.w(TAG, "Music reset failed", e) } }
 	override fun musicRows(): List<String> = try { music().rows() } catch (e: Exception) { Log.w(TAG, "Music rows failed", e); emptyList() }
 	override fun musicPick(row: Int): Boolean = try { music().pick(row) } catch (e: Exception) { Log.w(TAG, "Music pick failed", e); false }
-
-	/* Android Auto, shown in place of the dashboard */
-	private var androidAuto: DashAndroidAuto? = null
-	@Volatile private var aaOn = false
-	private var aaPresses = 0
-	/**
-	 * The knob only turns and presses, so presses are counted: one selects, two go back in Android Auto,
-	 * three come back to i3D's home screen. Android Auto keeps running behind i3D until the car disconnects.
-	 */
-	private val aaPressRunnable = Runnable {
-		val presses = aaPresses
-		aaPresses = 0
-		when {
-			presses >= 3 -> closeAndroidAuto()
-			presses == 2 -> androidAuto?.back()
-			presses == 1 -> androidAuto?.select()
-		}
-	}
-
-	private fun androidAutoSession(): DashAndroidAuto = androidAuto ?: DashAndroidAuto(context.applicationContext,
-			mapAppMode.maxWidth, mapAppMode.maxHeight).also { aa ->
-		aa.onStatus = { text -> handler.post { presentation?.showAndroidAutoStatus(text) } }
-		aa.onPicture = { handler.post { presentation?.showAndroidAutoStatus(null) } }
-		androidAuto = aa
-	}
-
-	/** Opens Android Auto on the car screen. Returns "started", or a problem to show on the dashboard */
-	fun openAndroidAuto(night: Boolean): String {
-		if (presentation == null || !pushing) return "The car screen isn't showing i3D"
-		if (!DashAndroidAuto.hasCertificate(context)) return "Set up Android Auto in the i3D phone app first"
-		handler.post {
-			if (videoOn) stopVideo()
-			val aa = androidAutoSession()
-			aa.setNight(night)
-			aa.setMoving(isMoving())
-			aa.start()
-			aaOn = true
-			aaPresses = 0
-			presentation?.showAndroidAuto(aa)
-		}
-		return "started"
-	}
-
-	/** Back to i3D's home screen. Android Auto stays connected, so it comes back straight away */
-	fun closeAndroidAuto() {
-		handler.post {
-			if (!aaOn) return@post
-			aaOn = false
-			handler.removeCallbacks(aaPressRunnable)
-			presentation?.hideAndroidAuto()
-			js("window.i3home && window.i3home()")
-		}
-	}
 
 	/* YouTube, only while parked */
 	@Volatile private var videoOn = false
@@ -1080,9 +1008,6 @@ class DashController(val context: Context,
 		pageLoaded = false
 		pushing = false
 		videoOn = false
-		aaOn = false
-		try { androidAuto?.stop() } catch (e: Exception) { Log.w(TAG, "Couldn't stop Android Auto", e) }
-		androidAuto = null
 		carUi = null
 		try { handler.removeCallbacksAndMessages(null) } catch (e: Exception) { Log.w(TAG, "Couldn't clear the queue", e) }
 		try { worker.shutdownNow() } catch (e: Exception) { Log.w(TAG, "Couldn't stop the background jobs", e) }
@@ -1117,24 +1042,6 @@ class DashController(val context: Context,
 
 	/** Called from the page's JavaScript, as window.I3Native */
 	inner class Bridge {
-		/** The Android Auto card: returns "started", or a problem to show */
-		@JavascriptInterface
-		fun androidAuto(night: Boolean): String = openAndroidAuto(night)
-
-		/** The page's day or night choice, passed on so Android Auto matches */
-		@JavascriptInterface
-		fun night(night: Boolean) {
-			this@DashController.androidAuto?.setNight(night)
-		}
-
-		/** A line for the Android Auto card on the home screen */
-		@JavascriptInterface
-		fun androidAutoLine(): String = when {
-			!DashAndroidAuto.hasCertificate(context) -> "Set up in the phone app"
-			this@DashController.androidAuto?.isConnected == true -> "Connected · press to open"
-			else -> "Your phone's apps on this screen"
-		}
-
 		@JavascriptInterface
 		fun speak(text: String) {
 			this@DashController.speak(text)
@@ -1387,75 +1294,6 @@ class DashPresentation(context: Context, display: Display, private val bridge: A
 	var webView: WebView? = null
 		private set
 	@Volatile private var inVideo = false
-	private var aaView: android.view.TextureView? = null
-	private var aaStatus: android.widget.TextView? = null
-	private var androidAuto: DashAndroidAuto? = null
-	private var aaSurface: android.view.Surface? = null
-
-	/**
-	 * Covers the dashboard with Android Auto's picture. The picture is decoded straight onto a TextureView
-	 * here, so it reaches the car the same way the dashboard does. Android Auto draws its screen in the
-	 * middle of a larger video, so the view is zoomed to just that middle part.
-	 */
-	fun showAndroidAuto(aa: DashAndroidAuto) {
-		val view = aaView ?: return
-		androidAuto = aa
-		view.surfaceTextureListener = object: android.view.TextureView.SurfaceTextureListener {
-			override fun onSurfaceTextureAvailable(texture: android.graphics.SurfaceTexture, width: Int, height: Int) {
-				texture.setDefaultBufferSize(aa.video.width, aa.video.height)
-				fitAndroidAuto(view, aa, width, height)
-				val surface = android.view.Surface(texture)
-				aaSurface = surface
-				aa.setSurface(surface)
-			}
-			override fun onSurfaceTextureSizeChanged(texture: android.graphics.SurfaceTexture, width: Int, height: Int) {
-				fitAndroidAuto(view, aa, width, height)
-			}
-			override fun onSurfaceTextureDestroyed(texture: android.graphics.SurfaceTexture): Boolean {
-				aa.setSurface(null)
-				aaSurface?.release()
-				aaSurface = null
-				return true
-			}
-			override fun onSurfaceTextureUpdated(texture: android.graphics.SurfaceTexture) {}
-		}
-		view.visibility = android.view.View.VISIBLE
-		// shown before: the view kept its surface while hidden, so the listener won't be told again
-		val kept = aaSurface
-		if (kept != null && view.isAvailable) {
-			fitAndroidAuto(view, aa, view.width, view.height)
-			aa.setSurface(kept)
-		}
-		if (!aa.isConnected) showAndroidAutoStatus(aa.lastStatus.takeIf { it != "Not started" } ?: "Starting Android Auto…")
-	}
-
-	private fun fitAndroidAuto(view: android.view.TextureView, aa: DashAndroidAuto, width: Int, height: Int) {
-		val v = aa.video
-		val sx = v.width.toFloat() / (v.width - v.marginWidth)
-		val sy = v.height.toFloat() / (v.height - v.marginHeight)
-		view.setTransform(android.graphics.Matrix().apply { setScale(sx, sy, width / 2f, height / 2f) })
-	}
-
-	/** A line of text over Android Auto's picture, until the picture arrives. Null hides it */
-	fun showAndroidAutoStatus(text: String?) {
-		val label = aaStatus ?: return
-		if (aaView?.visibility != android.view.View.VISIBLE) return
-		if (text == null) {
-			label.visibility = android.view.View.GONE
-		} else {
-			// messages only come while starting, or when something goes wrong, so they always show
-			label.text = text + "\n\nPress the knob three times to go back to i3D"
-			label.visibility = android.view.View.VISIBLE
-		}
-	}
-
-	/** Back to the dashboard. The picture's surface goes, and Android Auto carries on in the background */
-	fun hideAndroidAuto() {
-		aaView?.visibility = android.view.View.GONE
-		aaStatus?.visibility = android.view.View.GONE
-		androidAuto?.setSurface(null)
-		androidAuto = null
-	}
 
 	/** Swaps the dashboard for a bare YouTube player. The page has no access to the phone bridge */
 	fun showVideo(id: String, list: String) {
@@ -1502,31 +1340,12 @@ class DashPresentation(context: Context, display: Display, private val bridge: A
 				return true
 			}
 		}
-		// the dashboard, with Android Auto's picture and a status line laid over it when it's open
-		val root = android.widget.FrameLayout(context)
-		val fill = android.widget.FrameLayout.LayoutParams.MATCH_PARENT
-		root.addView(webView, android.widget.FrameLayout.LayoutParams(fill, fill))
-		val aa = android.view.TextureView(context)
-		aa.visibility = android.view.View.GONE
-		root.addView(aa, android.widget.FrameLayout.LayoutParams(fill, fill))
-		val status = android.widget.TextView(context).apply {
-			setBackgroundColor(Color.BLACK)
-			setTextColor(Color.WHITE)
-			textSize = 26f
-			gravity = android.view.Gravity.CENTER
-			setPadding(60, 0, 60, 0)
-			visibility = android.view.View.GONE
-		}
-		root.addView(status, android.widget.FrameLayout.LayoutParams(fill, fill))
-		aaView = aa
-		aaStatus = status
-		setContentView(root)
+		setContentView(webView)
 		webView.loadUrl("file:///android_asset/i3dash/index.html")
 		this.webView = webView
 	}
 
 	override fun onStop() {
-		hideAndroidAuto()
 		webView?.destroy()
 		webView = null
 		super.onStop()

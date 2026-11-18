@@ -32,7 +32,10 @@ class MapApp(iDriveConnectionStatus: IDriveConnectionStatus, securityAccess: Sec
              val mapAppMode: MapAppMode, val locationProvider: CarLocationProvider,
              val interaction: MapInteractionController, val mapPlaceSearch: MapPlaceSearch, val map: VirtualDisplayScreenCapture,
              val title: String = "Map",
-             val amName: String? = null, val amIcon: ByteArray? = null) {
+             val amName: String? = null, val amIcon: ByteArray? = null,
+             /** The names the car knows this app by. Each app on the phone needs its own, or the car mixes them up */
+             val rhmiIdent: String = "me.hufman.androidautoidrive.mapview",
+             val amIdent: String = "androidautoidrive.i3dash") {
 
 	val carappListener = CarAppListener()
 	val carConnection: BMWRemotingServer
@@ -62,7 +65,7 @@ class MapApp(iDriveConnectionStatus: IDriveConnectionStatus, securityAccess: Sec
 		carappListener.server = carConnection
 
 		// create the app in the car
-		val rhmiHandle = carConnection.rhmi_create(null, BMWRemoting.RHMIMetaData("me.hufman.androidautoidrive.mapview", BMWRemoting.VersionInfo(0, 1, 0), "me.hufman.androidautoidrive.mapview", "me.hufman"))
+		val rhmiHandle = carConnection.rhmi_create(null, BMWRemoting.RHMIMetaData(rhmiIdent, BMWRemoting.VersionInfo(0, 1, 0), rhmiIdent, "me.hufman"))
 		carConnection.rhmi_setResourceCached(rhmiHandle, BMWRemoting.RHMIResourceType.DESCRIPTION, carAppAssets.getUiDescription())
 //		RHMIUtils.rhmi_setResourceCached(carConnection, rhmiHandle, BMWRemoting.RHMIResourceType.TEXTDB, carAppAssets.getTextsDB("common"))
 		carConnection.rhmi_setResourceCached(rhmiHandle, BMWRemoting.RHMIResourceType.IMAGEDB, carAppAssets.getImagesDB("common"))
@@ -114,13 +117,13 @@ class MapApp(iDriveConnectionStatus: IDriveConnectionStatus, securityAccess: Sec
 		searchResultsView.initWidgets(fullImageView)
 
 		// register for events from the car
-		carConnection.rhmi_addActionEventHandler(rhmiHandle, "me.hufman.androidautoidrive.mapview", -1)
-		carConnection.rhmi_addHmiEventHandler(rhmiHandle, "me.hufman.androidautoidrive.mapview", -1, -1)
+		carConnection.rhmi_addActionEventHandler(rhmiHandle, rhmiIdent, -1)
+		carConnection.rhmi_addHmiEventHandler(rhmiHandle, rhmiIdent, -1, -1)
 
 		// optionally add a named icon to the car's menus that opens the full screen view
 		if (amName != null) {
 			amHandle = carConnection.am_create("0", "\u0000\u0000\u0000\u0000\u0000\u0002\u0000\u0000".toByteArray())
-			carConnection.am_addAppEventHandler(amHandle, "me.hufman.androidautoidrive.mapview.am")
+			carConnection.am_addAppEventHandler(amHandle, "$rhmiIdent.am")
 			createAmApp()
 		}
 	}
@@ -141,7 +144,7 @@ class MapApp(iDriveConnectionStatus: IDriveConnectionStatus, securityAccess: Sec
 			amInfo[languageCode] = name
 		}
 		synchronized(carConnection) {
-			carConnection.am_registerApp(handle, "androidautoidrive.i3dash", amInfo)
+			carConnection.am_registerApp(handle, amIdent, amInfo)
 		}
 	}
 

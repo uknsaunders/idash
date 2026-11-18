@@ -3,13 +3,12 @@
 Newest first. The app is built automatically and published as `i3-dash.apk` on the
 [`i3dash-latest` release](https://github.com/uknsaunders/idash/releases/tag/i3dash-latest), so the date below is when each change was made.
 
-## 18 November 2026, Android Auto on the car screen (experimental)
+## 18 November 2026, a separate Android Auto app (experimental)
 
-- **New Android Auto card** on the home screen's top row: your phone's Android Auto on the iDrive screen, through the same MyBMW link. i3D plays the part of an Android Auto head unit on the phone, decodes Android Auto's picture onto its hidden screen and sends it to the car like the dash.
-- **The knob:** turn to move, press to choose, press twice for back, three times for i3D's cards.
-- **Sound and microphone** go through the phone. Driving and night mode are passed to Android Auto.
-- **Setting up:** a new **Android Auto on the car screen** item in the phone app adds the head unit certificate (not included) and explains Android Auto's **Start head unit server** setting, with a check that it's listening.
-- Checked against a pretend phone in the automatic tests; not yet tried with real Android Auto or in the car.
+- **i3 Android Auto:** a second app built from the same code, published as `i3-android-auto.apk` on its own [`android-auto-latest` release](https://github.com/uknsaunders/idash/releases/tag/android-auto-latest). It shows the phone's Android Auto on the iDrive screen through the MyBMW link, the same way i3D shows its dash, with its own entry under ConnectedDrive. i3D itself is unchanged.
+- **The knob:** turn to move, press to choose, twice for back, three times for Android Auto's home screen. Sound and the microphone go through the phone; driving and night are passed to Android Auto.
+- **Setting up** on the phone: the head unit certificate (not included), Android Auto's **Start head unit server** setting, and the microphone.
+- **Behind the scenes:** the car-side names and the car-data permissions now come from each app's own ID, so the two apps don't clash. The protocol is checked against a pretend phone in the automatic tests; not yet tried with real Android Auto or in the car.
 
 ## 17 November 2026, one connection at a time
 

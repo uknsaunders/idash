@@ -78,6 +78,9 @@ android {
         // show the donation information, which is not allowed in the play store
         buildConfigField "boolean", "SHOW_DONATION", "true"
 
+        // false for i3D; true for the separate Android Auto app (the "aa" flavour)
+        buildConfigField "boolean", "ANDROID_AUTO_ONLY", "false"
+
         // i3 Dash: what3words API key, from the W3W_API_KEY GitHub secret
         buildConfigField "String", "W3W_API_KEY", '"' + (System.env.W3W_API_KEY ? System.env.W3W_API_KEY : "") + '"'
     }
@@ -186,6 +189,13 @@ android {
         }
         full {
             dimension "storefront"
+        }
+        aa {
+            // the separate Android Auto app: built from the same code as i3D, using the same MyBMW link,
+            // but installed as its own app with its own entry in the car
+            dimension "storefront"
+            applicationIdSuffix ".androidauto"
+            buildConfigField "boolean", "ANDROID_AUTO_ONLY", "true"
         }
         play {
             dimension "storefront"
