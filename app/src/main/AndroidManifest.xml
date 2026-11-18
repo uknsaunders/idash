@@ -100,24 +100,6 @@
             android:exported="false"
             android:theme="@android:style/Theme.DeviceDefault" />
 
-        <activity
-            android:name=".carapp.dash.SendDestinationActivity"
-            android:label="i3 Go"
-            android:exported="true"
-            android:launchMode="singleTop"
-            android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="geo" />
-            </intent-filter>
-        </activity>
 
         <activity-alias
             android:name=".phoneui.MainActivity"
@@ -1099,11 +1081,6 @@
             </intent-filter>
         </service>
         <service android:name=".carapp.calendar.CalendarAppService" android:exported="false">
-            <intent-filter>
-                <action android:name="me.hufman.androidautoidrive.carconnection.service" />
-            </intent-filter>
-        </service>
-        <service android:name=".carapp.dash.DashAppService" android:exported="false">
             <intent-filter>
                 <action android:name="me.hufman.androidautoidrive.carconnection.service" />
             </intent-filter>

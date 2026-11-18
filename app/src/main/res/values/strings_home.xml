@@ -17,11 +17,11 @@
     <string name="home_addons_sub">Extra apps for the car</string>
     <string name="home_settings_sub">Language, analytics, advanced</string>
     <string name="home_support_sub">Help and about</string>
-    <string name="home_section_main">i3D</string>
+    <string name="home_section_main">Android Auto</string>
     <string name="home_section_setup">Finish setting up</string>
     <string name="home_section_extras">Original AAIdrive apps</string>
     <string name="home_extras_note">Optional. Each of these is a separate entry in the car\'s menus. i3D does not need them.</string>
-    <string name="home_car_note">Everything else happens in the car: press the knob for places, calls, music and video.</string>
+    <string name="home_car_note">In the car, open ConnectedDrive and choose Android Auto. Turn the knob to move, press once to choose, twice to go back, three times for Android Auto\'s home screen.</string>
     <string name="home_setup_notifications">Music, alerts and calls on the car screen</string>
     <string name="home_setup_notifications_sub">Tap, switch on i3D, then Allow</string>
     <string name="home_setup_done">Done</string>
@@ -32,7 +32,7 @@
     <string name="home_setup_unlock_sub">Tap the three dots at the top right, then Allow restricted settings. Come back.</string>
     <string name="home_setup_switch">3. Switch it on</string>
     <string name="home_setup_switch_sub">Tap the i3D switch again, then Allow.</string>
-    <string name="home_section_crash">i3D stopped unexpectedly</string>
+    <string name="home_section_crash">The app stopped unexpectedly</string>
     <string name="home_crash">Send the report</string>
     <string name="home_crash_sub">Share the details of what went wrong, so it can be fixed</string>
     <string name="home_crash_clear">Dismiss</string>
@@ -41,8 +41,8 @@
     <string name="home_step_phone">Phone linked to the car</string>
     <string name="home_step_ready">Car link ready</string>
     <string name="home_step_connected">Connected to the car</string>
-    <string name="home_step_onscreen">i3D on the car screen</string>
-    <string name="home_problem">Last problem, %1$s: %2$s. i3D keeps retrying by itself.</string>
+    <string name="home_step_onscreen">Android Auto on the car screen</string>
+    <string name="home_problem">Last problem, %1$s: %2$s. The app keeps retrying by itself.</string>
     <string name="home_section_connection">Connection log</string>
     <string name="home_connlog">Send the connection log</string>
     <string name="home_connlog_sub">What happened each time the phone tried to connect, so a failed connection can be looked into</string>

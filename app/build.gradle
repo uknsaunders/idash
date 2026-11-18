@@ -79,7 +79,8 @@ android {
         buildConfigField "boolean", "SHOW_DONATION", "true"
 
         // false for i3D; true for the separate Android Auto app (the "aa" flavour)
-        buildConfigField "boolean", "ANDROID_AUTO_ONLY", "false"
+        // this branch builds only the Android Auto app
+        buildConfigField "boolean", "ANDROID_AUTO_ONLY", "true"
 
         // i3 Dash: what3words API key, from the W3W_API_KEY GitHub secret
         buildConfigField "String", "W3W_API_KEY", '"' + (System.env.W3W_API_KEY ? System.env.W3W_API_KEY : "") + '"'
@@ -130,7 +131,7 @@ android {
             signingConfig signingConfigs.release
         }
         debug {
-            applicationIdSuffix ".i3dash"       // installs next to the original AAIdrive instead of replacing it
+            applicationIdSuffix ".androidauto"  // its own app: installs next to i3D and the original AAIdrive
             signingConfig signingConfigs.i3dash
             if (runProguardInDebug || isRunningOnCI) {        // make sure to run tests against minified code in CI, but local dev can be fast
                 postprocessing {
@@ -189,13 +190,6 @@ android {
         }
         full {
             dimension "storefront"
-        }
-        aa {
-            // the separate Android Auto app: built from the same code as i3D, using the same MyBMW link,
-            // but installed as its own app with its own entry in the car
-            dimension "storefront"
-            applicationIdSuffix ".androidauto"
-            buildConfigField "boolean", "ANDROID_AUTO_ONLY", "true"
         }
         play {
             dimension "storefront"

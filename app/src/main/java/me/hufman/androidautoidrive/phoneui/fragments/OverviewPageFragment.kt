@@ -21,7 +21,6 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import me.hufman.androidautoidrive.ConnectionLog
 import me.hufman.androidautoidrive.R
-import me.hufman.androidautoidrive.carapp.dash.SendDestinationActivity
 import me.hufman.androidautoidrive.phoneui.viewmodels.ConnectionStatusModel
 import me.hufman.androidautoidrive.phoneui.viewmodels.activityViewModels
 
@@ -260,11 +259,7 @@ class OverviewPageFragment: Fragment() {
 			}))
 		}
 
-		val main = listOf(
-			Tile(R.drawable.ic_send_feather, R.string.home_send, R.string.home_send_sub) {
-				startActivity(Intent(ctx, SendDestinationActivity::class.java))
-			}
-		)
+		val main = listOf<Tile>()     // i3D's own items aren't in this app
 
 		// the original AAIdrive apps still work, but each is a separate entry in the car's menus
 		val extras = mutableListOf(

@@ -3,6 +3,11 @@
 Newest first. The app is built automatically and published as `i3-dash.apk` on the
 [`i3dash-latest` release](https://github.com/uknsaunders/idash/releases/tag/i3dash-latest), so the date below is when each change was made.
 
+## 18 November 2026, the Android Auto app on its own branch
+
+- The `android-auto` branch now builds only **i3 Android Auto**. The i3D dash, its web pages, the desk simulator and the "send to car" share target are gone from this branch; they stay on `main`.
+- The app's ID ends in `.androidauto`, so it installs next to i3D. Pushes to this branch publish `i3-android-auto.apk` on the `android-auto-latest` release.
+
 ## 18 November 2026, a separate Android Auto app (experimental)
 
 - **i3 Android Auto:** a second app built from the same code, published as `i3-android-auto.apk` on its own [`android-auto-latest` release](https://github.com/uknsaunders/idash/releases/tag/android-auto-latest). It shows the phone's Android Auto on the iDrive screen through the MyBMW link, the same way i3D shows its dash, with its own entry under ConnectedDrive. i3D itself is unchanged.

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- The separate Android Auto app leaves out i3D's "send a place to the car" share target,
-     so the phone's share menu only offers it once -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
-    <application>
-        <activity android:name="me.hufman.androidautoidrive.carapp.dash.SendDestinationActivity" tools:node="remove" />
-    </application>
-</manifest>

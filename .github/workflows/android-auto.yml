@@ -1,11 +1,11 @@
-name: i3 Dash
+name: i3 Android Auto
 
-# Builds the installable i3 Dash app every time the code changes,
-# and publishes it on the "latest" release page for downloading on the phone.
+# Builds the installable i3 Android Auto app every time this branch changes,
+# and publishes it on its own release page for downloading on the phone.
+# i3D itself is built from main, by main's own workflow.
 on:
   push:
-    # main publishes the app; the other branches are only built and checked, and their app kept with the run
-    branches: [main, android-auto]
+    branches: [android-auto]
   workflow_dispatch:
 
 permissions:
@@ -41,7 +41,7 @@ jobs:
       - name: Download build dependencies
         uses: ./.github/actions/download-externals-action
 
-      - name: Build i3 Dash
+      - name: Build i3 Android Auto
         env:
           W3W_API_KEY: ${{ secrets.W3W_API_KEY }}
           # a Spotify Client ID (not a secret, but kept out of the code) so Spotify can be listed and searched
@@ -49,7 +49,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          ./gradlew assembleNomapNonalyticsFullDebug assembleNomapNonalyticsAaDebug --stacktrace 2>&1 | tee build.log
+          ./gradlew assembleNomapNonalyticsFullDebug --stacktrace 2>&1 | tee build.log
 
       - name: Run the Android Auto checks
         shell: bash
@@ -72,16 +72,8 @@ jobs:
       - name: Name the app file
         run: |
           mkdir dist
-          cp app/build/outputs/apk/nomapNonalyticsFull/debug/*.apk dist/i3-dash.apk
-          cp app/build/outputs/apk/nomapNonalyticsAa/debug/*.apk dist/i3-android-auto.apk
+          cp app/build/outputs/apk/nomapNonalyticsFull/debug/*.apk dist/i3-android-auto.apk
           ls -la dist
-
-      - name: Keep a copy with this build
-        uses: actions/upload-artifact@v4
-        with:
-          name: i3-dash
-          path: dist/i3-dash.apk
-          retention-days: 14
 
       - name: Keep a copy of the Android Auto app with this build
         uses: actions/upload-artifact@v4
@@ -90,21 +82,8 @@ jobs:
           path: dist/i3-android-auto.apk
           retention-days: 14
 
-      - name: Publish to the latest release
-        if: github.ref == 'refs/heads/main'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: i3dash-latest
-          name: i3 Dash (latest build)
-          prerelease: true
-          make_latest: false
-          body: |
-            Latest i3 Dash build from commit ${{ github.sha }}.
-            Download **i3-dash.apk** on your phone and open it to install.
-          files: dist/i3-dash.apk
-
       - name: Publish the Android Auto app
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/android-auto'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: android-auto-latest
@@ -113,6 +92,6 @@ jobs:
           make_latest: false
           body: |
             Latest i3 Android Auto build from commit ${{ github.sha }}.
-            A separate app from i3D, built from the same code: your phone's Android Auto on the iDrive screen.
+            Your phone's Android Auto on the iDrive screen, through the MyBMW link. A separate app from i3D.
             Download **i3-android-auto.apk** on your phone and open it to install.
           files: dist/i3-android-auto.apk
