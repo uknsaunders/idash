@@ -182,7 +182,7 @@ class OverviewPageFragment: Fragment() {
 				try {
 					val report = crashFile.readText().take(12000)
 					startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain")
-						.putExtra(Intent.EXTRA_SUBJECT, "i3D crash report").putExtra(Intent.EXTRA_TEXT, report), getString(R.string.home_crash)))
+						.putExtra(Intent.EXTRA_SUBJECT, "i3 Android Auto crash report").putExtra(Intent.EXTRA_TEXT, report), getString(R.string.home_crash)))
 				} catch (e: Exception) {
 					// nothing to share with
 				}
@@ -198,9 +198,9 @@ class OverviewPageFragment: Fragment() {
 			container.addView(sectionLabel(ctx, R.string.home_section_connection))
 			container.addView(tileView(ctx, Tile(R.drawable.ic_send_feather, R.string.home_connlog, R.string.home_connlog_sub) {
 				try {
-					val report = "i3D ${me.hufman.androidautoidrive.BuildConfig.VERSION_NAME} on Android ${android.os.Build.VERSION.RELEASE} (${android.os.Build.MODEL})\n\n" + ConnectionLog.text().takeLast(30000)
+					val report = "i3 Android Auto ${me.hufman.androidautoidrive.BuildConfig.VERSION_NAME} on Android ${android.os.Build.VERSION.RELEASE} (${android.os.Build.MODEL})\n\n" + ConnectionLog.text().takeLast(30000)
 					startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain")
-						.putExtra(Intent.EXTRA_SUBJECT, "i3D connection log").putExtra(Intent.EXTRA_TEXT, report), getString(R.string.home_connlog)))
+						.putExtra(Intent.EXTRA_SUBJECT, "i3 Android Auto connection log").putExtra(Intent.EXTRA_TEXT, report), getString(R.string.home_connlog)))
 				} catch (e: Exception) {
 					// nothing to share with
 				}

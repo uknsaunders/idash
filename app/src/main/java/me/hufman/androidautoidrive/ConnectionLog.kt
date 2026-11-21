@@ -67,7 +67,7 @@ object ConnectionLog {
 		appShownTime = System.currentTimeMillis()
 		lastProblem = null
 		synchronized(this) { lastWritten.clear() }     // a fresh connection: log its steps again next time
-		add("i3D is on the car screen", false)
+		add("Android Auto is on the car screen", false)
 	}
 
 	/** The car connected: the start of a session, to tell a short one from a long one */

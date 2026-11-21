@@ -181,6 +181,21 @@ class MainService: Service() {
 		return START_STICKY
 	}
 
+	/**
+	 * Android 15 and later: the "data sync" allowance for the day has run out. The service has to stop
+	 * within a few seconds or Android stops the app with a crash. It starts again with the next drive.
+	 */
+	override fun onTimeout(startId: Int, fgsType: Int) {
+		ConnectionLog.event("Android's daily time limit for the connection service ran out, so it stopped until the next drive")
+		try {
+			handleActionStop()
+		} catch (e: Exception) {
+			Log.w(TAG, "Problem stopping after the time limit", e)
+		}
+		stopForeground(STOP_FOREGROUND_REMOVE)
+		stopSelf()
+	}
+
 	override fun onDestroy() {
 		handleActionStop()
 		// undo one time things
@@ -307,9 +322,12 @@ class MainService: Service() {
 
 	fun startForegroundService(id: Int, notification: Notification) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			val bluetoothFlag = if (PermissionChecker.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) == PermissionChecker.PERMISSION_GRANTED) {
-				ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE } else { 0 }
-			val flags = bluetoothFlag + ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+			// "Connected device" has no time limit, so it's used on its own whenever it's allowed.
+			// "Data sync" is only the fallback: from Android 15 it may run for 6 hours a day, and adding it
+			// alongside meant the always-on service was stopped with a crash after 6 hours.
+			val bluetoothOk = PermissionChecker.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) == PermissionChecker.PERMISSION_GRANTED
+			val flags = if (bluetoothOk) ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+					else ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
 			try {
 				super.startForeground(id, notification, flags)
 			} catch (e: Exception) {
